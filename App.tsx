@@ -67,7 +67,7 @@ const App: React.FC = () => {
          <button onClick={() => setLang('ru')} className={`px-2 py-0.5 rounded-full transition-all ${lang === 'ru' ? 'bg-wurm-accent text-black font-bold' : 'hover:text-wurm-accent'}`}>RU</button>
       </div>
 
-      <Header t={t} lang={lang} />
+      <Header t={t} />
       
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
