@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Network, ArrowLeft } from 'lucide-react';
-import { Language } from '../types';
 
 interface HeaderProps {
   t: any;
-  lang: Language;
 }
 
-const Header: React.FC<HeaderProps> = ({ t, lang }) => {
+const Header: React.FC<HeaderProps> = ({ t }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
