@@ -54,7 +54,7 @@ const Stats: React.FC<StatsProps> = ({ recipes, t, lang }) => {
               dataKey="value"
               stroke="none"
             >
-              {data.map((_, index) => (
+              {data.map((_entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
