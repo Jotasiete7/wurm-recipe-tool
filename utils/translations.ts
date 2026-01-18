@@ -41,7 +41,7 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       mainSite: "Main Site",
       miningTool: "Mining Tool",
       recipeGuide: "Recipe Guide",
-      introTitle: "Culinaria",
+      introTitle: "Cooking",
       introSubtitle: "recipes. Filter by skill, container, or ingredients to optimize your cooking.",
       filters: "Filters",
       reset: "Reset",
