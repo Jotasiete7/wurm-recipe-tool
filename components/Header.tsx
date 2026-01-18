@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Network, ArrowLeft } from 'lucide-react';
+import { Language } from '../types';
 
 interface HeaderProps {
   t: any;
+  lang: Language;
 }
 
 const Header: React.FC<HeaderProps> = ({ t }) => {
