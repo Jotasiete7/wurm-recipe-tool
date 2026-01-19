@@ -210,6 +210,8 @@ const App: React.FC = () => {
 
       <RecipeModal 
         recipe={selectedRecipe} 
+        allRecipes={recipes}
+        onNavigate={setSelectedRecipe}
         onClose={() => setSelectedRecipe(null)}
         lang={lang}
         t={t}
