@@ -12,6 +12,9 @@ const App: React.FC = () => {
   // --- State ---
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  // History stack to track navigation depth
+  const [recipeHistory, setRecipeHistory] = useState<Recipe[]>([]);
+  
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     skill: '',
@@ -56,6 +59,36 @@ const App: React.FC = () => {
 
   const resetFilters = () => {
     setFilters({ search: '', skill: '', container: '', cooker: '' });
+  };
+
+  // Open a recipe from the main grid (resets history)
+  const openRecipe = (recipe: Recipe) => {
+    setRecipeHistory([]);
+    setSelectedRecipe(recipe);
+  };
+
+  // Navigate deeper (pushes current to history)
+  const navigateToRecipe = (nextRecipe: Recipe) => {
+    if (selectedRecipe) {
+      setRecipeHistory(prev => [...prev, selectedRecipe]);
+    }
+    setSelectedRecipe(nextRecipe);
+  };
+
+  // Go back one step
+  const handleBack = () => {
+    if (recipeHistory.length === 0) return;
+    
+    const previousRecipe = recipeHistory[recipeHistory.length - 1];
+    const newHistory = recipeHistory.slice(0, -1);
+    
+    setRecipeHistory(newHistory);
+    setSelectedRecipe(previousRecipe);
+  };
+
+  const closeRecipe = () => {
+    setSelectedRecipe(null);
+    setRecipeHistory([]);
   };
 
   return (
@@ -174,7 +207,7 @@ const App: React.FC = () => {
                   <RecipeCard 
                     key={`${recipe.name}-${idx}`} 
                     recipe={recipe} 
-                    onClick={setSelectedRecipe} 
+                    onClick={openRecipe} 
                     lang={lang}
                   />
                 ))}
@@ -211,8 +244,10 @@ const App: React.FC = () => {
       <RecipeModal 
         recipe={selectedRecipe} 
         allRecipes={recipes}
-        onNavigate={setSelectedRecipe}
-        onClose={() => setSelectedRecipe(null)}
+        onNavigate={navigateToRecipe}
+        onBack={handleBack}
+        canGoBack={recipeHistory.length > 0}
+        onClose={closeRecipe}
         lang={lang}
         t={t}
       />

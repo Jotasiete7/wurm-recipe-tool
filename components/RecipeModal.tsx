@@ -2,18 +2,20 @@ import React, { useEffect } from 'react';
 import { Recipe, Language } from '../types';
 import { getEmoji } from '../utils/dataUtils';
 import { translateSkill } from '../utils/translations';
-import { X, ChefHat, Box, Flame, Utensils, ArrowRightCircle } from 'lucide-react';
+import { X, ChefHat, Box, Flame, Utensils, ArrowRightCircle, ArrowLeft } from 'lucide-react';
 
 interface RecipeModalProps {
   recipe: Recipe | null;
   allRecipes: Recipe[];
   onNavigate: (recipe: Recipe) => void;
+  onBack: () => void;
+  canGoBack: boolean;
   onClose: () => void;
   lang: Language;
   t: any;
 }
 
-const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, allRecipes, onNavigate, onClose, lang, t }) => {
+const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, allRecipes, onNavigate, onBack, canGoBack, onClose, lang, t }) => {
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (recipe) {
@@ -54,9 +56,22 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, allRecipes, onNavigat
         
         {/* Header */}
         <div className="relative bg-gradient-to-r from-wurm-panel to-black p-6 sm:p-8 border-b border-wurm-border">
+          
+          {/* Back Button */}
+          {canGoBack && (
+            <button 
+              onClick={onBack}
+              className="absolute top-4 left-4 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors z-10"
+              title="Go Back"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
+
+          {/* Close Button */}
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors"
+            className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors z-10"
           >
             <X size={20} />
           </button>
