@@ -120,76 +120,84 @@ const App: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Sidebar Filters */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-wurm-panel rounded border border-wurm-border p-5 sticky top-24 shadow-xl shadow-black">
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-wurm-border">
-                <h3 className="text-xs font-bold text-wurm-accent uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-wurm-accent animate-pulse"></span>
-                  {t.ui.filters}
-                </h3>
-                <button 
-                  onClick={resetFilters}
-                  className="text-[10px] text-wurm-muted hover:text-white transition-colors flex items-center gap-1 font-mono uppercase"
-                >
-                  <RotateCcw size={10} /> {t.ui.reset}
-                </button>
+          <div className="lg:col-span-1">
+            {/* 
+              FIX: Container Sticky 
+              We wrap both the filters and the stats in a single sticky container.
+              This prevents them from overlapping each other when scrolling.
+            */}
+            <div className="sticky top-24 space-y-6">
+              
+              <div className="bg-wurm-panel rounded border border-wurm-border p-5 shadow-xl shadow-black">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-wurm-border">
+                  <h3 className="text-xs font-bold text-wurm-accent uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-wurm-accent animate-pulse"></span>
+                    {t.ui.filters}
+                  </h3>
+                  <button 
+                    onClick={resetFilters}
+                    className="text-[10px] text-wurm-muted hover:text-white transition-colors flex items-center gap-1 font-mono uppercase"
+                  >
+                    <RotateCcw size={10} /> {t.ui.reset}
+                  </button>
+                </div>
+
+                <div className="space-y-5">
+                  {/* Search */}
+                  <div className="relative group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-wurm-muted group-focus-within:text-wurm-accent transition-colors" size={14} />
+                    <input 
+                      type="text" 
+                      placeholder={t.ui.searchPlaceholder}
+                      className="w-full pl-9 pr-4 py-2.5 rounded bg-black/50 border border-wurm-border text-xs font-mono text-wurm-text focus:border-wurm-accent focus:outline-none transition-all placeholder:text-wurm-muted/50"
+                      value={filters.search}
+                      onChange={(e) => handleFilterChange('search', e.target.value)}
+                    />
+                  </div>
+
+                  {/* Selects */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider font-mono">{t.ui.skillLabel}</label>
+                    <select 
+                      className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-xs text-wurm-text focus:border-wurm-accent outline-none font-mono"
+                      value={filters.skill}
+                      onChange={(e) => handleFilterChange('skill', e.target.value)}
+                    >
+                      <option value="">{t.ui.allSkills}</option>
+                      {skillOptions.map(opt => <option key={opt} value={opt}>{translateSkill(opt, lang)}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider font-mono">{t.ui.containerLabel}</label>
+                    <select 
+                      className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-xs text-wurm-text focus:border-wurm-accent outline-none font-mono"
+                      value={filters.container}
+                      onChange={(e) => handleFilterChange('container', e.target.value)}
+                    >
+                      <option value="">{t.ui.allContainers}</option>
+                      {containerOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider font-mono">{t.ui.cookerLabel}</label>
+                    <select 
+                      className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-xs text-wurm-text focus:border-wurm-accent outline-none font-mono"
+                      value={filters.cooker}
+                      onChange={(e) => handleFilterChange('cooker', e.target.value)}
+                    >
+                      <option value="">{t.ui.allCookers}</option>
+                      {cookerOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-5">
-                {/* Search */}
-                <div className="relative group">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-wurm-muted group-focus-within:text-wurm-accent transition-colors" size={14} />
-                  <input 
-                    type="text" 
-                    placeholder={t.ui.searchPlaceholder}
-                    className="w-full pl-9 pr-4 py-2.5 rounded bg-black/50 border border-wurm-border text-xs font-mono text-wurm-text focus:border-wurm-accent focus:outline-none transition-all placeholder:text-wurm-muted/50"
-                    value={filters.search}
-                    onChange={(e) => handleFilterChange('search', e.target.value)}
-                  />
-                </div>
-
-                {/* Selects */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider font-mono">{t.ui.skillLabel}</label>
-                  <select 
-                    className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-xs text-wurm-text focus:border-wurm-accent outline-none font-mono"
-                    value={filters.skill}
-                    onChange={(e) => handleFilterChange('skill', e.target.value)}
-                  >
-                    <option value="">{t.ui.allSkills}</option>
-                    {skillOptions.map(opt => <option key={opt} value={opt}>{translateSkill(opt, lang)}</option>)}
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider font-mono">{t.ui.containerLabel}</label>
-                  <select 
-                    className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-xs text-wurm-text focus:border-wurm-accent outline-none font-mono"
-                    value={filters.container}
-                    onChange={(e) => handleFilterChange('container', e.target.value)}
-                  >
-                    <option value="">{t.ui.allContainers}</option>
-                    {containerOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider font-mono">{t.ui.cookerLabel}</label>
-                  <select 
-                    className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-xs text-wurm-text focus:border-wurm-accent outline-none font-mono"
-                    value={filters.cooker}
-                    onChange={(e) => handleFilterChange('cooker', e.target.value)}
-                  >
-                    <option value="">{t.ui.allCookers}</option>
-                    {cookerOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                </div>
+              {/* Stats Component - Show only on larger screens */}
+              <div className="hidden lg:block">
+                <Stats recipes={filteredRecipes} t={t} lang={lang} />
               </div>
-            </div>
-
-            {/* Stats Component - Show only on larger screens in sidebar */}
-            <div className="hidden lg:block sticky top-[450px]">
-              <Stats recipes={filteredRecipes} t={t} lang={lang} />
             </div>
           </div>
 
