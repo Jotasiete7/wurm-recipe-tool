@@ -48,14 +48,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const { data } = await supabase
                 .from('profiles')
-                .select('role')
+                .select('global_role')
                 .eq('id', userId)
                 .single();
 
-            if (data && data.role === 'admin') {
+            if (data && (data.global_role === 'admin' || data.global_role === 'superadmin')) {
                 setIsAdmin(true);
             } else {
-                // Here we could also check for 'editor' role provided by A Guilda admin panel
                 setIsAdmin(false);
             }
         } catch (e) {
