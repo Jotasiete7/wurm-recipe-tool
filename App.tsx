@@ -4,17 +4,20 @@ import RecipeCard from './components/RecipeCard';
 import RecipeModal from './components/RecipeModal';
 import Stats from './components/Stats';
 import LoginModal from './components/LoginModal';
+import RecipeSubmissionModal from './components/RecipeSubmissionModal'; // New Import
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { parseCSV, getUniqueValues } from './utils/dataUtils';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
-import { Search, RotateCcw, User, LogOut } from 'lucide-react';
+import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
+import { supabase } from './supabaseClient'; // Import supabase
 
 const AppContent: React.FC = () => {
   // --- State ---
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false); // New State
   const { user, signOut, isAdmin } = useAuth();
 
   const [filters, setFilters] = useState<FilterState>({
@@ -29,9 +32,37 @@ const AppContent: React.FC = () => {
 
   // --- Initialization ---
   useEffect(() => {
-    // Parse CSV data once on mount
-    const data = parseCSV();
-    setRecipes(data);
+    // 1. Fetch CSV Data (Legacy/Static)
+    const staticData = parseCSV();
+
+    // 2. Fetch Supabase Data (Dynamic/Verified)
+    const fetchDynamicRecipes = async () => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('status', 'verified'); // Only show verified content to public/main view
+
+      if (!error && data) {
+        // Merge Data
+        // Note: DB structure might differ slightly, need to ensure type compatibility
+        // Our Schema: name, skill, container, cooker, mandatory... matches Recipe type roughly
+        const dynamicRecipes: Recipe[] = data.map(d => ({
+          name: d.name,
+          skill: d.skill || undefined,
+          container: d.container || undefined,
+          cooker: d.cooker || undefined,
+          mandatory: d.mandatory || undefined
+        }));
+
+        // Combine unique recipes (prevent duplicates if migrated)
+        // For now, simple concat
+        setRecipes([...staticData, ...dynamicRecipes]);
+      } else {
+        setRecipes(staticData);
+      }
+    };
+
+    fetchDynamicRecipes();
   }, []);
 
   // --- Derived State (Options for Dropdowns) ---
@@ -44,7 +75,7 @@ const AppContent: React.FC = () => {
     return recipes.filter(r => {
       const matchSearch =
         r.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        r.mandatory.toLowerCase().includes(filters.search.toLowerCase());
+        r.mandatory?.toLowerCase().includes(filters.search.toLowerCase());
 
       const matchSkill = !filters.skill || r.skill === filters.skill;
       const matchContainer = !filters.container || (r.container && r.container.includes(filters.container));
@@ -75,10 +106,32 @@ const AppContent: React.FC = () => {
         </div>
 
         {/* Auth Actions */}
-        <div className="flex items-center pl-2 border-l border-wurm-border/50">
+        <div className="flex items-center pl-2 border-l border-wurm-border/50 gap-2">
+          {/* Submit Button (Only Verified Users) */}
+          {user && (
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 border-r border-wurm-border/50 pr-3"
+              title="Submit New Recipe"
+            >
+              <Plus size={14} />
+              <span className="hidden sm:inline">Add Recipe</span>
+            </button>
+          )}
+
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="hidden sm:inline text-wurm-accent" title={user.email}>{isAdmin ? 'ADMIN' : 'User'}</span>
+              {/* Role Badge */}
+              <div
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-bold
+                    ${isAdmin ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'text-wurm-accent'}
+                `}
+                title={user.email}
+              >
+                {isAdmin ? <Crown size={12} /> : <Shield size={12} />}
+                <span className="hidden sm:inline">{isAdmin ? 'Super Admin' : 'Member'}</span>
+              </div>
+
               <button onClick={() => signOut()} className="p-1 hover:text-red-400 transition-colors" title="Sair">
                 <LogOut size={14} />
               </button>
@@ -242,6 +295,10 @@ const AppContent: React.FC = () => {
 
       {showLoginModal && (
         <LoginModal onClose={() => setShowLoginModal(false)} />
+      )}
+
+      {showSubmitModal && (
+        <RecipeSubmissionModal onClose={() => setShowSubmitModal(false)} />
       )}
     </div>
   );
