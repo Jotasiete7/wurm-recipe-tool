@@ -121,16 +121,19 @@ const AppContent: React.FC = () => {
 
           {user ? (
             <div className="flex items-center gap-2">
-              {/* Role Badge */}
-              <div
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-bold
-                    ${isAdmin ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'text-wurm-accent'}
+              {/* Role Badge - Links to Main Site VIP Area */}
+              <a
+                href="https://wurm-aguild-site.pages.dev"
+                target="_blank"
+                rel="noreferrer"
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-bold transition-transform hover:scale-105
+                    ${isAdmin ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'text-wurm-accent hover:bg-wurm-accent/10'}
                 `}
-                title={user.email}
+                title="Go to Guild VIP Area"
               >
                 {isAdmin ? <Crown size={12} /> : <Shield size={12} />}
                 <span className="hidden sm:inline">{isAdmin ? 'Super Admin' : 'Member'}</span>
-              </div>
+              </a>
 
               <button onClick={() => signOut()} className="p-1 hover:text-red-400 transition-colors" title="Sair">
                 <LogOut size={14} />
