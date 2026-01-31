@@ -16,6 +16,7 @@ import { supabase } from './supabaseClient'; // Import supabase
 const AppContent: React.FC = () => {
   // --- State ---
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false); // New State
@@ -52,6 +53,7 @@ const AppContent: React.FC = () => {
         setRecipes(dynamicRecipes);
       } else {
         console.error('Error fetching recipes:', error);
+        setFetchError(error?.message || 'Unknown error');
         setRecipes([]);
       }
     };
@@ -286,6 +288,13 @@ const AppContent: React.FC = () => {
           <div className="mt-4 flex justify-center gap-6 text-xs font-mono">
             <a href="https://www.wurmpedia.com/index.php/Cooking" target="_blank" rel="noreferrer" className="text-wurm-accent hover:text-white transition-colors">Wurmpedia</a>
             <a href="https://forum.wurmonline.com" target="_blank" rel="noreferrer" className="text-wurm-accent hover:text-white transition-colors">Official Forum</a>
+          </div>
+          {/* DEBUG INFO */}
+          <div className="mt-6 p-2 bg-black/50 border border-red-900/30 text-[10px] font-mono text-red-400 inline-block rounded">
+            <p>DEBUG MODE:</p>
+            <p>API: {supabase.supabaseUrl}</p>
+            <p>Recipes Loaded: {recipes.length}</p>
+            {fetchError && <p className="text-red-500 font-bold">ERROR: {fetchError}</p>}
           </div>
         </div>
       </footer>
