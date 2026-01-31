@@ -292,7 +292,7 @@ const AppContent: React.FC = () => {
           {/* DEBUG INFO */}
           <div className="mt-6 p-2 bg-black/50 border border-red-900/30 text-[10px] font-mono text-red-400 inline-block rounded">
             <p>DEBUG MODE:</p>
-            <p>API: {supabase.supabaseUrl}</p>
+            <p>API: {import.meta.env.VITE_SUPABASE_URL}</p>
             <p>Recipes Loaded: {recipes.length}</p>
             {fetchError && <p className="text-red-500 font-bold">ERROR: {fetchError}</p>}
           </div>
