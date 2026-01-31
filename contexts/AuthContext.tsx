@@ -41,12 +41,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     });
 
                     if (error) {
-                        alert(`SSO Function Error: ${error.message}`);
-                        console.error(error);
+                        console.error('SSO Function Error:', error);
                         throw error;
                     }
                     if (data?.error) {
-                        alert(`SSO Data Error: ${data.error}`);
+                        console.error('SSO Data Error:', data.error);
                         throw new Error(data.error);
                     }
 
@@ -58,19 +57,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         });
 
                         if (sessionError) {
-                            alert(`Set Session Error: ${sessionError.message}`);
+                            console.error('Set Session Error:', sessionError);
                             throw sessionError;
-                        } else {
-                            // alert("Login Success! Redirecting...");
-                            // Success - URL clean happens automatically next render or we can force verify
                         }
                     } else {
-                        alert("No session data returned from SSO");
+                        console.error('No session data returned from SSO');
+                        throw new Error('No session data returned');
                     }
 
                 } catch (e: any) {
-                    console.error("SSO Exchange Error:", e);
-                    alert(`Authentication Failed: ${e.message || e}`);
+                    console.error('SSO Exchange Error:', e);
+                    // Silent fail - user will see they're not logged in
                 }
             }
 
