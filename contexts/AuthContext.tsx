@@ -40,14 +40,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         body: { code, client_id: 'recipes_tool' }
                     });
 
-                    // Note: Since Functions are on Hub, we need to call Hub's function URL?
-                    // Recipes Tool is separate project usually?
-                    // Context said "The user has 1 active workspaces... [URI] -> [CorpusName]".
-                    // If they share the Supabase Project, `supabase.functions.invoke` calls the function on THAT project.
-                    // Yes, they share `wurm-guild` project. So this works!
-
-                    if (error) throw error;
-                    if (data?.error) throw new Error(data.error);
+                    if (error) {
+                        alert(`SSO Function Error: ${error.message}`);
+                        console.error(error);
+                        throw error;
+                    }
+                    if (data?.error) {
+                        alert(`SSO Data Error: ${data.error}`);
+                        throw new Error(data.error);
+                    }
 
                     if (data?.session) {
                         // Set Session!
@@ -55,12 +56,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             access_token: data.session.access_token,
                             refresh_token: data.session.refresh_token
                         });
-                        if (sessionError) throw sessionError;
+
+                        if (sessionError) {
+                            alert(`Set Session Error: ${sessionError.message}`);
+                            throw sessionError;
+                        } else {
+                            // alert("Login Success! Redirecting...");
+                            // Success - URL clean happens automatically next render or we can force verify
+                        }
+                    } else {
+                        alert("No session data returned from SSO");
                     }
 
-                } catch (e) {
+                } catch (e: any) {
                     console.error("SSO Exchange Error:", e);
-                    alert("Authentication Failed");
+                    alert(`Authentication Failed: ${e.message || e}`);
                 }
             }
 
