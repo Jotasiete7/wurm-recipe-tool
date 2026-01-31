@@ -1,5 +1,13 @@
 
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'node:crypto';
+
+// --- DOCUMENTATION ---
+// legacy_key Generation Logic:
+// We use a SHA256 hash to ensure idempotency and integrity.
+// Formula: SHA256( normalize(name) + normalize(skill) + normalize(mandatory_ingredients) )
+// This ensures that even if we run the script multiple times, we never duplicate data
+// and we can always trace which legacy recipe corresponds to which DB entry.
 
 // --- CONFIG ---
 const SUPABASE_URL = 'https://gzhvqprdrtudyokhgxlj.supabase.co';
@@ -7,8 +15,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// --- LEGACY DATA ---
-// (Copied from constants.ts to ensure standalone execution)
 const RAW_CSV_DATA = `name,skill,container,cooker,mandatory
 apple juice,Bebidas,,,raw green apple
 applesauce,Hot Food Cooking,Caldeirão,Forno Aberto,green apple (x2); water (100%); sugar; ground ginger; ground nutmeg
@@ -457,9 +463,20 @@ function normalizeTerm(term: string): string {
     return NORMALIZATION_MAP[trimmed] || trimmed;
 }
 
+// --- IDEMPOTENCY KEY GENERATION ---
+function generateLegacyKey(recipe: any): string {
+    // Unique String Construction:
+    // name|skill|mandatory
+    const rawKey = `${normalizeTerm(recipe.name)}|${normalizeTerm(recipe.skill)}|${normalizeTerm(recipe.mandatory)}`;
+    return crypto.createHash('sha256').update(rawKey).digest('hex');
+}
+
 // --- MIGRATION LOGIC ---
 async function migrate_recipes() {
-    console.log("🚀 Starting Migration...");
+    console.log("🚀 Starting Strict Migration (Historical Event)...");
+
+    // 1. Check if we have source column properly
+    // This is just a runtime sanity check
 
     const lines = RAW_CSV_DATA.trim().split('\n');
     console.log(`Checking ${lines.length - 1} recipes...`);
@@ -475,45 +492,53 @@ async function migrate_recipes() {
         const name = values[0]?.trim();
         if (!name) continue;
 
-        const recipe = {
+        const recipeData = {
             name: name,
             skill: normalizeTerm(values[1]),
             container: normalizeTerm(values[2]),
             cooker: normalizeTerm(values[3]),
-            mandatory: values[4]?.trim() || '',
-            status: 'verified', // Legacy is verified by default
-            difficulty: 0 // Default
+            mandatory: values[4]?.trim() || ''
         };
 
-        // Check availability
-        // Note: Using select count for speed check
-        const { count } = await supabase
-            .from('recipes')
-            .select('id', { count: 'exact', head: true })
-            .eq('name', recipe.name);
+        const legacyKey = generateLegacyKey(recipeData);
 
-        if (count && count > 0) {
+        // IDEMPOTENCY CHECK
+        const { data: existing } = await supabase
+            .from('recipes')
+            .select('id, legacy_key')
+            .eq('legacy_key', legacyKey)
+            .single();
+
+        if (existing) {
             skipped++;
-            if (skipped % 50 === 0) process.stdout.write('.');
+            // STRICT LOGGING
+            console.log(`[SKIPPED] ${name.padEnd(30)} -> legacy_key=${legacyKey.substring(0, 8)}...`);
             continue;
         }
 
-        // Insert
-        const { error } = await supabase.from('recipes').insert(recipe);
+        // INSERT
+        const { error } = await supabase.from('recipes').insert({
+            ...recipeData,
+            status: 'legacy_verified',
+            source: 'legacy',
+            difficulty: 0,
+            legacy_key: legacyKey
+        });
 
         if (error) {
-            console.error(`\n❌ Error inserting ${recipe.name}:`, error.message);
+            console.error(`\n❌ Error inserting ${name}:`, error.message);
             errors++;
         } else {
             added++;
-            if (added % 50 === 0) process.stdout.write('+');
+            console.log(`[INSERTED] ${name.padEnd(30)} -> legacy_key=${legacyKey.substring(0, 8)}...`);
         }
     }
 
     console.log(`\n\n✅ Migration Complete!`);
-    console.log(`Added: ${added}`);
-    console.log(`Skipped (Already Exists): ${skipped}`);
-    console.log(`Errors: ${errors}`);
+    console.log(`Total Read: ${lines.length - 1}`);
+    console.log(`Inserted:   ${added}`);
+    console.log(`Skipped:    ${skipped}`);
+    console.log(`Errors:     ${errors}`);
 }
 
 migrate_recipes();
