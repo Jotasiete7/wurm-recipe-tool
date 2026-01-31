@@ -44,27 +44,7 @@ export function getEmoji(name: string): string {
   return '🍴';
 }
 
-export function parseCSV(): Recipe[] {
-  const lines = RAW_CSV_DATA.trim().split('\n');
-  const data: Recipe[] = [];
-
-  // Skip header (index 0)
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',');
-
-    if (values.length >= 1) {
-      data.push({
-        name: values[0]?.trim() || '',
-        skill: normalizeTerm(values[1]),
-        container: normalizeTerm(values[2]),
-        cooker: normalizeTerm(values[3]),
-        mandatory: values[4]?.trim() || '' // Ingredients stay as is (English)
-      });
-    }
-  }
-
-  return data.filter(r => r.name);
-}
+// parseCSV removed - Legacy data migrated to Supabase
 
 export function getUniqueValues(recipes: Recipe[], key: keyof Recipe): string[] {
   const values = new Set<string>();
