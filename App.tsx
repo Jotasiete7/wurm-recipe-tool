@@ -6,6 +6,7 @@ import Stats from './components/Stats';
 import LoginModal from './components/LoginModal';
 import RecipeSubmissionModal from './components/RecipeSubmissionModal'; // New Import
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import UsageWidget from './components/Admin/UsageWidget';
 import { getUniqueValues } from './utils/dataUtils';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
@@ -227,6 +228,13 @@ const AppContent: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Admin Stats Widget */}
+            {isAdmin && (
+              <div className="hidden lg:block sticky top-24 mt-6 z-10">
+                <UsageWidget />
+              </div>
+            )}
 
             {/* Stats Component - Show only on larger screens in sidebar */}
             <div className="hidden lg:block sticky top-[450px]">
