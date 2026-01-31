@@ -16,7 +16,7 @@ import { supabase } from './supabaseClient'; // Import supabase
 const AppContent: React.FC = () => {
   // --- State ---
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false); // New State
@@ -53,7 +53,6 @@ const AppContent: React.FC = () => {
         setRecipes(dynamicRecipes);
       } else {
         console.error('Error fetching recipes:', error);
-        setFetchError(error?.message || 'Unknown error');
         setRecipes([]);
       }
     };
@@ -289,6 +288,7 @@ const AppContent: React.FC = () => {
             <a href="https://www.wurmpedia.com/index.php/Cooking" target="_blank" rel="noreferrer" className="text-wurm-accent hover:text-white transition-colors">Wurmpedia</a>
             <a href="https://forum.wurmonline.com" target="_blank" rel="noreferrer" className="text-wurm-accent hover:text-white transition-colors">Official Forum</a>
           </div>
+        </div>
       </footer>
 
       <RecipeModal
