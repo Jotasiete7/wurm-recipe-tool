@@ -1,5 +1,5 @@
 import { Recipe } from '../types';
-import { EMOJI_MAP, RAW_CSV_DATA } from '../constants';
+import { EMOJI_MAP } from '../constants';
 
 // Mapping from Portuguese/Mixed CSV values to Standard English
 // This ensures Containers/Recipients are always English (per user request)
@@ -12,7 +12,7 @@ const NORMALIZATION_MAP: Record<string, string> = {
   'Hot Food Cooking': 'Hot Food Cooking', // Already EN
   'Laticínios': 'Dairy Food Making',
   'Moagem': 'Milling',
-  
+
   // Containers / Cookers (Recipients)
   'Caldeirão': 'Cauldron',
   'Pedra de Assar': 'Baking Stone',
@@ -47,11 +47,11 @@ export function getEmoji(name: string): string {
 export function parseCSV(): Recipe[] {
   const lines = RAW_CSV_DATA.trim().split('\n');
   const data: Recipe[] = [];
-  
+
   // Skip header (index 0)
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',');
-    
+
     if (values.length >= 1) {
       data.push({
         name: values[0]?.trim() || '',
@@ -62,7 +62,7 @@ export function parseCSV(): Recipe[] {
       });
     }
   }
-  
+
   return data.filter(r => r.name);
 }
 
