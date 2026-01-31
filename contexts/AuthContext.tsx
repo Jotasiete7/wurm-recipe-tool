@@ -15,7 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // HUB URL (In production this should be env var)
-const HUB_URL = 'http://localhost:3000'; // Or production URL
+const HUB_URL = import.meta.env.VITE_HUB_URL || 'https://wurm-aguild-site.pages.dev';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [session, setSession] = useState<Session | null>(null);
