@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signIn = () => {
         // Redirect to Hub SSO
-        const redirectUri = window.location.origin + window.location.pathname; // Current page as callback
+        const redirectUri = window.location.origin; // Always redirect to root
         const authUrl = `${HUB_URL}/sso/authorize?client_id=recipes_tool&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = authUrl;
     };
