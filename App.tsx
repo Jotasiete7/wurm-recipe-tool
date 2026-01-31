@@ -6,7 +6,7 @@ import Stats from './components/Stats';
 import LoginModal from './components/LoginModal';
 import RecipeSubmissionModal from './components/RecipeSubmissionModal'; // New Import
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { parseCSV, getUniqueValues } from './utils/dataUtils';
+import { getUniqueValues } from './utils/dataUtils';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
@@ -32,20 +32,14 @@ const AppContent: React.FC = () => {
 
   // --- Initialization ---
   useEffect(() => {
-    // 1. Fetch CSV Data (Legacy/Static)
-    const staticData = parseCSV();
-
-    // 2. Fetch Supabase Data (Dynamic/Verified)
+    // Fetch Supabase Data (Legacy + New)
     const fetchDynamicRecipes = async () => {
       const { data, error } = await supabase
         .from('recipes')
         .select('*')
-        .eq('status', 'verified'); // Only show verified content to public/main view
+        .in('status', ['verified', 'legacy_verified']);
 
       if (!error && data) {
-        // Merge Data
-        // Note: DB structure might differ slightly, need to ensure type compatibility
-        // Our Schema: name, skill, container, cooker, mandatory... matches Recipe type roughly
         const dynamicRecipes: Recipe[] = data.map(d => ({
           name: d.name,
           skill: d.skill || undefined,
@@ -54,11 +48,10 @@ const AppContent: React.FC = () => {
           mandatory: d.mandatory || undefined
         }));
 
-        // Combine unique recipes (prevent duplicates if migrated)
-        // For now, simple concat
-        setRecipes([...staticData, ...dynamicRecipes]);
+        setRecipes(dynamicRecipes);
       } else {
-        setRecipes(staticData);
+        console.error('Error fetching recipes:', error);
+        setRecipes([]);
       }
     };
 
