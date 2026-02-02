@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .eq('id', userId)
                 .single();
 
-            if (data && (data.global_role === 'admin' || data.global_role === 'superadmin')) {
+            if (data && (data.global_role === 'admin' || data.global_role === 'superadmin' || data.global_role === 'editor')) {
                 setIsAdmin(true);
             } else {
                 setIsAdmin(false);

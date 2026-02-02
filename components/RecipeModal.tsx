@@ -1,17 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Recipe, Language } from '../types';
 import { getEmoji } from '../utils/dataUtils';
 import { translateSkill } from '../utils/translations';
-import { X, ChefHat, Box, Flame, Utensils } from 'lucide-react';
+import { X, ChefHat, Box, Flame, Utensils, Edit3 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import RecipeEditModal from './RecipeEditModal';
 
 interface RecipeModalProps {
   recipe: Recipe | null;
   onClose: () => void;
+  onRefresh?: () => void;
   lang: Language;
   t: any;
 }
 
-const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) => {
+const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onRefresh, lang, t }) => {
+  const { isAdmin } = useAuth();
+  const [showEditModal, setShowEditModal] = useState(false);
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (recipe) {
@@ -45,6 +50,17 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
           >
             <X size={20} />
           </button>
+
+          {/* Edit Button (Admin Only) */}
+          {isAdmin && recipe.id && (
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="absolute top-4 right-16 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors"
+              title="Edit hints"
+            >
+              <Edit3 size={16} />
+            </button>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-end">
             <div className="w-24 h-24 bg-black/40 rounded border border-wurm-border flex items-center justify-center text-5xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
@@ -143,6 +159,18 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && recipe && (
+        <RecipeEditModal
+          recipe={recipe}
+          onClose={() => setShowEditModal(false)}
+          onSave={() => {
+            setShowEditModal(false);
+            if (onRefresh) onRefresh();
+          }}
+        />
+      )}
     </div>
   );
 };
