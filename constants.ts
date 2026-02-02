@@ -10,5 +10,34 @@ export const EMOJI_MAP: Record<string, string> = {
   'biscuit': '🍪', 'trifle': '🍮', 'porridge': '🥣', 'pudding': '🍮'
 };
 
+// Recipe Form Options
+export const SKILLS = [
+  'Baking',
+  'Cooking',
+  'Hot food cooking',
+  'Butchering',
+  'Beverages',
+  'Dairy food making'
+] as const;
+
+export const CONTAINERS = [
+  'None',
+  'Bowl',
+  'Pottery bowl',
+  'Cauldron',
+  'Sauce pan',
+  'Frying pan',
+  'Baking stone',
+  'Stone oven'
+] as const;
+
+export const COOKERS = [
+  'None',
+  'Campfire',
+  'Stone oven',
+  'Kiln',
+  'Forge'
+] as const;
+
 // Legacy Data Removed - Migrated to Supabase (2024-01-31)
 // See backup_legacy_recipes.json for original data
