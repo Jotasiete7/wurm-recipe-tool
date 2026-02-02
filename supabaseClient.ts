@@ -13,6 +13,31 @@ if (!supabaseUrl || !supabaseAnonKey) {
     const handler = {
         get: function (_target: any, prop: string) {
             if (prop === 'then') return undefined; // Avoid Promise behavior
+
+            // Mock auth namespace
+            if (prop === 'auth') {
+                return {
+                    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => { } } } }),
+                    getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+                    signOut: () => Promise.resolve({ error: null }),
+                };
+            }
+
+            // Mock from() for DB queries
+            if (prop === 'from') {
+                return () => ({
+                    select: () => ({
+                        in: () => ({
+                            order: () => ({
+                                range: () => Promise.resolve({ data: [], error: { message: 'Missing Configuration' } })
+                            })
+                        }),
+                        eq: () => Promise.resolve({ data: null, error: null }),
+                        single: () => Promise.resolve({ data: null, error: null }),
+                    })
+                });
+            }
+
             return (..._args: any[]) => {
                 console.error(`Supabase client called without configuration (method: ${prop})`);
                 return { data: null, error: { message: 'Missing Supabase Configuration' } }; // Mock response
