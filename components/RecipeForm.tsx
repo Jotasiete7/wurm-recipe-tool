@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 import { Upload, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { SKILLS, CONTAINERS, COOKERS } from '../constants';
 import { useRecipeForm } from '../hooks/useRecipeForm';
-import { Recipe } from '../types';
+import { Recipe, Language } from '../types';
+import { translateSkill } from '../utils/translations';
 
 interface RecipeFormProps {
     initialRecipe?: Recipe;
@@ -22,6 +23,8 @@ interface RecipeFormProps {
     showSubmitterName?: boolean;
     submitterName?: string;
     onSubmitterNameChange?: (name: string) => void;
+    t: any;
+    lang: Language;
 }
 
 export default function RecipeForm({
@@ -32,6 +35,8 @@ export default function RecipeForm({
     showSubmitterName = false,
     submitterName = '',
     onSubmitterNameChange,
+    t,
+    lang
 }: RecipeFormProps) {
     const {
         formData,
@@ -57,7 +62,7 @@ export default function RecipeForm({
         }
 
         if (requireScreenshot && !formData.screenshot) {
-            setSubmitError('Proof screenshot is required');
+            setSubmitError(t.forms.proofScreenshot + ' required');
             return;
         }
 
@@ -95,7 +100,7 @@ export default function RecipeForm({
             {/* Recipe Name */}
             <div>
                 <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
-                    Recipe Name *
+                    {t.forms.recipeName}
                 </label>
                 <input
                     type="text"
@@ -103,7 +108,7 @@ export default function RecipeForm({
                     onChange={(e) => updateField('name', e.target.value)}
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.name ? 'border-red-500' : 'border-wurm-border'
                         } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
-                    placeholder="e.g., Bread"
+                    placeholder={t.forms.recipeNamePlaceholder}
                 />
                 {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
             </div>
@@ -111,7 +116,7 @@ export default function RecipeForm({
             {/* Skill */}
             <div>
                 <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
-                    Skill *
+                    {t.forms.skill}
                 </label>
                 <select
                     value={formData.skill}
@@ -119,10 +124,10 @@ export default function RecipeForm({
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.skill ? 'border-red-500' : 'border-wurm-border'
                         } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
                 >
-                    <option value="">Select skill...</option>
+                    <option value="">{t.forms.selectSkill}</option>
                     {SKILLS.map((s) => (
                         <option key={s} value={s}>
-                            {s}
+                            {translateSkill(s, lang)}
                         </option>
                     ))}
                 </select>
@@ -132,7 +137,7 @@ export default function RecipeForm({
             {/* Container */}
             <div>
                 <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
-                    Container *
+                    {t.forms.container}
                 </label>
                 <select
                     value={formData.container}
@@ -140,7 +145,7 @@ export default function RecipeForm({
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.container ? 'border-red-500' : 'border-wurm-border'
                         } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
                 >
-                    <option value="">Select container...</option>
+                    <option value="">{t.forms.selectContainer}</option>
                     {CONTAINERS.map((c) => (
                         <option key={c} value={c}>
                             {c}
@@ -153,7 +158,7 @@ export default function RecipeForm({
             {/* Cooker */}
             <div>
                 <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
-                    Cooker *
+                    {t.forms.cooker}
                 </label>
                 <select
                     value={formData.cooker}
@@ -161,7 +166,7 @@ export default function RecipeForm({
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.cooker ? 'border-red-500' : 'border-wurm-border'
                         } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
                 >
-                    <option value="">Select cooker...</option>
+                    <option value="">{t.forms.selectCooker}</option>
                     {COOKERS.map((c) => (
                         <option key={c} value={c}>
                             {c}
@@ -175,14 +180,14 @@ export default function RecipeForm({
             <div>
                 <div className="flex items-center justify-between mb-2">
                     <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider">
-                        Ingredients *
+                        {t.forms.ingredients}
                     </label>
                     <button
                         type="button"
                         onClick={addIngredient}
                         className="text-xs text-wurm-accent hover:text-white transition-colors flex items-center gap-1"
                     >
-                        <Plus size={14} /> Add
+                        <Plus size={14} /> {t.forms.addIngredient}
                     </button>
                 </div>
 
@@ -193,14 +198,14 @@ export default function RecipeForm({
                                 type="text"
                                 value={ing.name}
                                 onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
-                                placeholder="Ingredient name"
+                                placeholder={t.forms.ingredientNamePlaceholder}
                                 className="flex-1 px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
                             />
                             <input
                                 type="text"
                                 value={ing.qty}
                                 onChange={(e) => updateIngredient(idx, 'qty', e.target.value)}
-                                placeholder="Qty"
+                                placeholder={t.forms.qtyPlaceholder}
                                 className="w-24 px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
                             />
                             {formData.ingredients.length > 1 && (
@@ -220,38 +225,38 @@ export default function RecipeForm({
 
             {/* Hints Section */}
             <div className="border-t border-wurm-border pt-6">
-                <h3 className="text-sm font-bold text-wurm-text mb-4">Recipe Hints (Optional)</h3>
+                <h3 className="text-sm font-bold text-wurm-text mb-4">{t.forms.hintsTitle}</h3>
 
                 <div className="space-y-3">
                     <div>
-                        <label className="block text-xs text-wurm-muted mb-1">English Hint</label>
+                        <label className="block text-xs text-wurm-muted mb-1">{t.forms.hintEn}</label>
                         <input
                             type="text"
                             value={formData.hintEn}
                             onChange={(e) => updateField('hintEn', e.target.value)}
-                            placeholder="e.g., Best made with high quality ingredients"
+                            placeholder={t.forms.hintPlaceholderEn}
                             className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs text-wurm-muted mb-1">Portuguese Hint</label>
+                        <label className="block text-xs text-wurm-muted mb-1">{t.forms.hintPt}</label>
                         <input
                             type="text"
                             value={formData.hintPt}
                             onChange={(e) => updateField('hintPt', e.target.value)}
-                            placeholder="e.g., Melhor feito com ingredientes de alta qualidade"
+                            placeholder={t.forms.hintPlaceholderPt}
                             className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs text-wurm-muted mb-1">Russian Hint</label>
+                        <label className="block text-xs text-wurm-muted mb-1">{t.forms.hintRu}</label>
                         <input
                             type="text"
                             value={formData.hintRu}
                             onChange={(e) => updateField('hintRu', e.target.value)}
-                            placeholder="e.g., Лучше всего готовить из качественных ингредиентов"
+                            placeholder={t.forms.hintPlaceholderRu}
                             className="w-full px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
                         />
                     </div>
@@ -262,7 +267,7 @@ export default function RecipeForm({
             {requireScreenshot && (
                 <div>
                     <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
-                        Proof Screenshot *
+                        {t.forms.proofScreenshot}
                     </label>
                     <input
                         ref={fileInputRef}
@@ -281,10 +286,10 @@ export default function RecipeForm({
                         className="w-full px-4 py-3 rounded bg-wurm-panel border border-wurm-border text-sm text-wurm-text hover:border-wurm-accent transition-all flex items-center justify-center gap-2"
                     >
                         <Upload size={16} />
-                        {formData.screenshot ? formData.screenshot.name : 'Choose file...'}
+                        {formData.screenshot ? formData.screenshot.name : t.forms.chooseFile}
                     </button>
                     <p className="text-xs text-wurm-muted mt-1">
-                        Upload a screenshot showing the recipe in-game
+                        {t.forms.screenshotHelp}
                     </p>
                 </div>
             )}
@@ -293,17 +298,17 @@ export default function RecipeForm({
             {showSubmitterName && (
                 <div>
                     <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
-                        Your Name (Optional)
+                        {t.forms.submitterName}
                     </label>
                     <input
                         type="text"
                         value={submitterName}
                         onChange={(e) => onSubmitterNameChange?.(e.target.value)}
-                        placeholder="e.g., YourIngameName"
+                        placeholder={t.forms.submitterNamePlaceholder}
                         className="w-full px-4 py-2.5 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
                     />
                     <p className="text-xs text-wurm-muted mt-1">
-                        Optional: Your in-game name for credit
+                        {t.forms.submitterNameHelp}
                     </p>
                 </div>
             )}
@@ -315,7 +320,7 @@ export default function RecipeForm({
                     disabled={loading}
                     className="flex-1 px-6 py-3 bg-wurm-accent text-black font-bold text-sm uppercase tracking-widest rounded hover:bg-wurm-accent/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {loading ? 'Processing...' : submitLabel}
+                    {loading ? t.forms.processing : submitLabel}
                 </button>
             </div>
         </form>

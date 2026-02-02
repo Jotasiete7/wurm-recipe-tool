@@ -169,6 +169,8 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onRefresh, l
             setShowEditModal(false);
             if (onRefresh) onRefresh();
           }}
+          t={t}
+          lang={lang}
         />
       )}
     </div>

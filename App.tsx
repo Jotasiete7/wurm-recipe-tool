@@ -318,7 +318,11 @@ const AppContent: React.FC = () => {
       )}
 
       {showSubmitModal && (
-        <RecipeSubmissionModal onClose={() => setShowSubmitModal(false)} />
+        <RecipeSubmissionModal
+          onClose={() => setShowSubmitModal(false)}
+          t={t}
+          lang={lang}
+        />
       )}
     </div>
   );

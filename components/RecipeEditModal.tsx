@@ -1,15 +1,17 @@
 import { X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
-import { Recipe } from '../types';
+import { Recipe, Language } from '../types';
 import RecipeForm from './RecipeForm';
 
 interface RecipeEditModalProps {
     recipe: Recipe;
     onClose: () => void;
     onSave: () => void;
+    t: any;
+    lang: Language;
 }
 
-export default function RecipeEditModal({ recipe, onClose, onSave }: RecipeEditModalProps) {
+export default function RecipeEditModal({ recipe, onClose, onSave, t, lang }: RecipeEditModalProps) {
     const handleSubmit = async (data: {
         name: string;
         skill: string;
@@ -56,9 +58,9 @@ export default function RecipeEditModal({ recipe, onClose, onSave }: RecipeEditM
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-wurm-border">
                     <div>
-                        <h2 className="text-xl font-serif font-bold text-white">Edit Recipe</h2>
+                        <h2 className="text-xl font-serif font-bold text-white">{t.forms.editTitle}</h2>
                         <p className="text-xs text-wurm-muted mt-1 font-mono">
-                            Editing: {recipe.name}
+                            {t.forms.editing} {recipe.name}
                         </p>
                     </div>
                     <button
@@ -74,9 +76,11 @@ export default function RecipeEditModal({ recipe, onClose, onSave }: RecipeEditM
                     <RecipeForm
                         initialRecipe={recipe}
                         onSubmit={handleSubmit}
-                        submitLabel="Save Changes"
+                        submitLabel={t.forms.saveChanges}
                         requireScreenshot={false}
                         showSubmitterName={false}
+                        t={t}
+                        lang={lang}
                     />
                 </div>
             </div>

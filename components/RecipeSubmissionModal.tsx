@@ -3,12 +3,15 @@ import { X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import RecipeForm from './RecipeForm';
+import { Language } from '../types';
 
 interface RecipeSubmissionModalProps {
     onClose: () => void;
+    t: any;
+    lang: Language;
 }
 
-export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModalProps) {
+export default function RecipeSubmissionModal({ onClose, t, lang }: RecipeSubmissionModalProps) {
     const { user } = useAuth();
     const [submitterName, setSubmitterName] = useState('');
 
@@ -24,7 +27,7 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
         hint_ru: string;
     }) => {
         if (!data.screenshot) {
-            throw new Error('Proof screenshot is required');
+            throw new Error(t.forms.proofScreenshot + ' required');
         }
 
         // 1. Upload Screenshot
@@ -67,7 +70,7 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
         }
 
         // Success!
-        alert('Recipe submitted successfully! It will be reviewed by admins.');
+        alert(t.forms.successMessage);
         onClose();
     };
 
@@ -77,9 +80,9 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-wurm-border">
                     <div>
-                        <h2 className="text-xl font-serif font-bold text-white">Submit New Recipe</h2>
+                        <h2 className="text-xl font-serif font-bold text-white">{t.forms.submitTitle}</h2>
                         <p className="text-xs text-wurm-muted mt-1 font-mono">
-                            Share your recipe with the community
+                            {t.forms.submitSubtitle}
                         </p>
                     </div>
                     <button
@@ -94,11 +97,13 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
                 <div className="flex-1 overflow-y-auto p-6">
                     <RecipeForm
                         onSubmit={handleSubmit}
-                        submitLabel="Submit Recipe"
+                        submitLabel={t.forms.submitRecipe}
                         requireScreenshot={true}
                         showSubmitterName={true}
                         submitterName={submitterName}
                         onSubmitterNameChange={setSubmitterName}
+                        t={t}
+                        lang={lang}
                     />
                 </div>
             </div>
