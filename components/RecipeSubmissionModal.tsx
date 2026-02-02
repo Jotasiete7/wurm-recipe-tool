@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Upload, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { SKILLS, CONTAINERS, COOKERS } from '../constants';
 
 interface RecipeSubmissionModalProps {
     onClose: () => void;
@@ -18,7 +19,13 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
     const [error, setError] = useState<string | null>(null);
 
     const [name, setName] = useState('');
+    const [skill, setSkill] = useState('');
+    const [container, setContainer] = useState('');
+    const [cooker, setCooker] = useState('');
     const [ingredients, setIngredients] = useState<IngredientRow[]>([{ name: '', qty: '' }]);
+    const [hintEn, setHintEn] = useState('');
+    const [hintPt, setHintPt] = useState('');
+    const [hintRu, setHintRu] = useState('');
     const [screenshot, setScreenshot] = useState<File | null>(null);
     const [submitterName, setSubmitterName] = useState('');
 
@@ -53,6 +60,9 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
 
         try {
             if (!name) throw new Error("Recipe name is required.");
+            if (!skill) throw new Error("Skill is required.");
+            if (!container) throw new Error("Container is required.");
+            if (!cooker) throw new Error("Cooker is required.");
             if (ingredients.some(i => !i.name)) throw new Error("All ingredients must have a name.");
             if (!screenshot) throw new Error("Proof screenshot is required.");
 
@@ -84,7 +94,13 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
                 .from('recipes')
                 .insert({
                     name,
+                    skill,
+                    container,
+                    cooker,
                     mandatory: mandatoryString,
+                    hint_en: hintEn || null,
+                    hint_pt: hintPt || null,
+                    hint_ru: hintRu || null,
                     status: 'pending', // Pending approval
                     submitted_by: user?.id,
                     screenshot_url: publicUrl
@@ -144,6 +160,57 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
                             />
                         </div>
 
+                        {/* Skill */}
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider flex items-center gap-1">
+                                Skill <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                value={skill}
+                                onChange={(e) => setSkill(e.target.value)}
+                                className="w-full bg-black/50 border border-wurm-border rounded px-3 py-2 text-sm text-white focus:border-wurm-accent outline-none font-mono"
+                            >
+                                <option value="">Select skill...</option>
+                                {SKILLS.map(s => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Container */}
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider flex items-center gap-1">
+                                Container <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                value={container}
+                                onChange={(e) => setContainer(e.target.value)}
+                                className="w-full bg-black/50 border border-wurm-border rounded px-3 py-2 text-sm text-white focus:border-wurm-accent outline-none font-mono"
+                            >
+                                <option value="">Select container...</option>
+                                {CONTAINERS.map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Cooker */}
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider flex items-center gap-1">
+                                Cooker <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                value={cooker}
+                                onChange={(e) => setCooker(e.target.value)}
+                                className="w-full bg-black/50 border border-wurm-border rounded px-3 py-2 text-sm text-white focus:border-wurm-accent outline-none font-mono"
+                            >
+                                <option value="">Select cooker...</option>
+                                {COOKERS.map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        </div>
+
                         {/* Ingredients */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -188,6 +255,34 @@ export default function RecipeSubmissionModal({ onClose }: RecipeSubmissionModal
                                     </div>
                                 ))}
                             </div>
+                        </div>
+
+                        {/* Hints */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-wurm-muted uppercase tracking-wider">
+                                Hints (Optional)
+                            </label>
+                            <input
+                                type="text"
+                                value={hintEn}
+                                onChange={(e) => setHintEn(e.target.value)}
+                                placeholder="Hint in English"
+                                className="w-full bg-black/50 border border-wurm-border rounded px-3 py-2 text-xs text-white focus:border-wurm-accent outline-none font-mono"
+                            />
+                            <input
+                                type="text"
+                                value={hintPt}
+                                onChange={(e) => setHintPt(e.target.value)}
+                                placeholder="Dica em Português"
+                                className="w-full bg-black/50 border border-wurm-border rounded px-3 py-2 text-xs text-white focus:border-wurm-accent outline-none font-mono"
+                            />
+                            <input
+                                type="text"
+                                value={hintRu}
+                                onChange={(e) => setHintRu(e.target.value)}
+                                placeholder="Подсказка на русском"
+                                className="w-full bg-black/50 border border-wurm-border rounded px-3 py-2 text-xs text-white focus:border-wurm-accent outline-none font-mono"
+                            />
                         </div>
 
                         {/* Screenshot */}

@@ -30,22 +30,22 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      <div 
+      <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
-      
+
       <div className="relative w-full max-w-2xl bg-wurm-panel border border-wurm-border rounded shadow-2xl transform transition-all animate-in fade-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
-        
+
         {/* Header */}
         <div className="relative bg-gradient-to-r from-wurm-panel to-black p-6 sm:p-8 border-b border-wurm-border">
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors"
           >
             <X size={20} />
           </button>
-          
+
           <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-end">
             <div className="w-24 h-24 bg-black/40 rounded border border-wurm-border flex items-center justify-center text-5xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
               {getEmoji(recipe.name)}
@@ -65,7 +65,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 bg-wurm-bg/50">
-          
+
           {/* Main Attributes Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {recipe.container && (
@@ -77,7 +77,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
                 <p className="text-wurm-text font-serif text-lg">{recipe.container}</p>
               </div>
             )}
-            
+
             {recipe.cooker && (
               <div className="bg-wurm-panel p-4 rounded border border-wurm-border hover:border-wurm-border/80 transition-colors">
                 <div className="flex items-center gap-3 text-wurm-accentDim mb-2">
@@ -87,7 +87,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
                 <p className="text-wurm-text font-serif text-lg">{recipe.cooker}</p>
               </div>
             )}
-             {recipe.skill && (
+            {recipe.skill && (
               <div className="bg-wurm-panel p-4 rounded border border-wurm-border col-span-1 sm:col-span-2 hover:border-wurm-border/80 transition-colors">
                 <div className="flex items-center gap-3 text-wurm-accentDim mb-2">
                   <ChefHat size={18} />
@@ -104,7 +104,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
               <span className="text-wurm-accent"><Utensils size={20} /></span>
               {t.ui.ingredients}
             </h3>
-            
+
             {ingredients.length > 0 ? (
               <div className="bg-black/20 rounded border border-wurm-border/50">
                 <ul className="divide-y divide-wurm-border/50">
@@ -122,6 +122,25 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, lang, t }) =
               </p>
             )}
           </div>
+
+          {/* Hint Section */}
+          {(recipe.hint_en || recipe.hint_pt || recipe.hint_ru) && (
+            <div className="border-t border-wurm-border pt-6">
+              <div className="bg-wurm-accent/5 border border-wurm-accent/20 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-wurm-accent text-xl">💡</span>
+                  <div className="flex-1">
+                    <h4 className="text-xs font-bold text-wurm-accent uppercase tracking-wider mb-2">Hint</h4>
+                    <p className="text-sm text-wurm-text font-mono leading-relaxed">
+                      {lang === 'en' && recipe.hint_en}
+                      {lang === 'pt' && (recipe.hint_pt || recipe.hint_en)}
+                      {lang === 'ru' && (recipe.hint_ru || recipe.hint_en)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
