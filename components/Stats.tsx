@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Recipe, Language } from '../types';
 import { translateSkill } from '../utils/translations';
+import { supabase } from '../supabaseClient';
 
 interface StatsProps {
-  recipes: Recipe[];
+  recipes: Recipe[]; // Fallback / Local data
   t: any;
   lang: Language;
+  totalCount?: number; // Global count passed from parent
 }
 
 // Guild Theme Colors for Charts
@@ -21,22 +23,46 @@ const COLORS = [
   '#171717'  // Neutral
 ];
 
-const Stats: React.FC<StatsProps> = ({ recipes, t, lang }) => {
+const Stats: React.FC<StatsProps> = ({ recipes, t, lang, totalCount }) => {
+  const [globalSkills, setGlobalSkills] = useState<string[]>([]);
+
+  // Fetch global stats to ensure chart represents the WHOLE database, not just the current page
+  useEffect(() => {
+    const fetchGlobalStats = async () => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('skill');
+
+      if (data && !error) {
+        setGlobalSkills(data.map(r => r.skill).filter(Boolean));
+      }
+    };
+
+    fetchGlobalStats();
+  }, []); // Run once on mount
+
   const data = useMemo(() => {
     const counts: Record<string, number> = {};
-    recipes.forEach(r => {
-      if (r.skill) {
-        // Translate the key for the chart
-        const translatedSkill = translateSkill(r.skill, lang);
-        counts[translatedSkill] = (counts[translatedSkill] || 0) + 1;
-      }
+
+    // Use global data if available, otherwise fallback to prop data (current page)
+    const sourceSkills = globalSkills.length > 0
+      ? globalSkills
+      : recipes.map(r => r.skill).filter(Boolean);
+
+    sourceSkills.forEach(skill => {
+      // Translate the key for the chart
+      const translatedSkill = translateSkill(skill, lang);
+      counts[translatedSkill] = (counts[translatedSkill] || 0) + 1;
     });
 
     return Object.entries(counts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 8); // Top 8 skills
-  }, [recipes, lang]);
+  }, [recipes, globalSkills, lang]);
+
+  // Display count: Prefer totalCount prop, then global fetch length, then current page length
+  const displayCount = totalCount || (globalSkills.length > 0 ? globalSkills.length : recipes.length);
 
   return (
     <div className="bg-wurm-panel rounded border border-wurm-border p-6 shadow-lg">
@@ -73,7 +99,7 @@ const Stats: React.FC<StatsProps> = ({ recipes, t, lang }) => {
       </div>
       <div className="mt-4 text-center">
         <span className="text-4xl font-serif font-bold text-wurm-accent block">
-          {recipes.length}
+          {displayCount}
         </span>
         <p className="text-wurm-muted text-[10px] font-mono uppercase tracking-widest">{t.ui.totalRecipes}</p>
       </div>

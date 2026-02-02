@@ -227,7 +227,7 @@ const AppContent: React.FC = () => {
 
             {/* Stats Component - Show only on larger screens in sidebar */}
             <div className="hidden lg:block">
-              <Stats recipes={filteredRecipes} t={t} lang={lang} />
+              <Stats recipes={filteredRecipes} t={t} lang={lang} totalCount={totalCount} />
             </div>
           </div>
 
