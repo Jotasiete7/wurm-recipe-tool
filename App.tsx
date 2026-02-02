@@ -1,25 +1,25 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Header from './components/Header';
 import RecipeCard from './components/RecipeCard';
 import RecipeModal from './components/RecipeModal';
 import Stats from './components/Stats';
 import LoginModal from './components/LoginModal';
-import RecipeSubmissionModal from './components/RecipeSubmissionModal'; // New Import
+import RecipeSubmissionModal from './components/RecipeSubmissionModal';
+import Pagination from './components/Pagination';
+import RecipeSkeleton from './components/RecipeSkeleton';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import UsageWidget from './components/Admin/UsageWidget';
+import { usePaginatedRecipes } from './hooks/usePaginatedRecipes';
 import { getUniqueValues } from './utils/dataUtils';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
-import { supabase } from './supabaseClient'; // Import supabase
 
 const AppContent: React.FC = () => {
   // --- State ---
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSubmitModal, setShowSubmitModal] = useState(false); // New State
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
 
   const [filters, setFilters] = useState<FilterState>({
@@ -32,64 +32,41 @@ const AppContent: React.FC = () => {
   const [lang, setLang] = useState<Language>('en');
   const t = TRANSLATIONS[lang];
 
-  // --- Initialization ---
-  useEffect(() => {
-    // Fetch Supabase Data (Legacy + New)
-    const fetchDynamicRecipes = async () => {
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .in('status', ['verified', 'legacy_verified']);
-
-      if (!error && data) {
-        const dynamicRecipes: Recipe[] = data.map(d => ({
-          id: d.id,
-          name: d.name,
-          skill: d.skill || undefined,
-          container: d.container || undefined,
-          cooker: d.cooker || undefined,
-          mandatory: d.mandatory || undefined,
-          difficulty: d.difficulty || undefined,
-          status: d.status || undefined,
-          submitted_by: d.submitted_by || undefined,
-          screenshot_url: d.screenshot_url || undefined,
-          created_at: d.created_at || undefined,
-          legacy_key: d.legacy_key || undefined,
-          source: d.source || undefined,
-          hint_en: d.hint_en || undefined,
-          hint_pt: d.hint_pt || undefined,
-          hint_ru: d.hint_ru || undefined
-        }));
-
-        setRecipes(dynamicRecipes);
-      } else {
-        console.error('Error fetching recipes:', error);
-        setRecipes([]);
-      }
-    };
-
-    fetchDynamicRecipes();
-  }, []);
+  // --- Paginated Recipes ---
+  const {
+    recipes,
+    loading,
+    error,
+    page,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPrevPage,
+    goToPage,
+    refresh,
+  } = usePaginatedRecipes({
+    itemsPerPage: 50,
+    searchTerm: filters.search,
+  });
 
   // --- Derived State (Options for Dropdowns) ---
+  // Note: For dropdowns, we get unique values from ALL recipes, not just current page
+  // This requires a separate query or we accept that options might be incomplete
   const skillOptions = useMemo(() => getUniqueValues(recipes, 'skill'), [recipes]);
   const containerOptions = useMemo(() => getUniqueValues(recipes, 'container'), [recipes]);
   const cookerOptions = useMemo(() => getUniqueValues(recipes, 'cooker'), [recipes]);
 
-  // --- Filtering Logic ---
+  // --- Client-Side Filtering (skill, container, cooker) ---
+  // Search is handled server-side in usePaginatedRecipes
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
-      const matchSearch =
-        r.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        r.mandatory?.toLowerCase().includes(filters.search.toLowerCase());
-
       const matchSkill = !filters.skill || r.skill === filters.skill;
       const matchContainer = !filters.container || (r.container && r.container.includes(filters.container));
       const matchCooker = !filters.cooker || (r.cooker && r.cooker.includes(filters.cooker));
 
-      return matchSearch && matchSkill && matchContainer && matchCooker;
+      return matchSkill && matchContainer && matchCooker;
     });
-  }, [recipes, filters]);
+  }, [recipes, filters.skill, filters.container, filters.cooker]);
 
   // --- Handlers ---
   const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -258,21 +235,47 @@ const AppContent: React.FC = () => {
           <div className="lg:col-span-3">
             <div className="mb-6 flex items-center justify-between">
               <span className="text-xs text-wurm-muted font-mono uppercase tracking-widest">
-                {t.ui.foundRecipes} {filteredRecipes.length}
+                {loading ? 'Loading...' : `${t.ui.foundRecipes} ${totalCount}`}
               </span>
             </div>
 
-            {filteredRecipes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredRecipes.map((recipe, idx) => (
-                  <RecipeCard
-                    key={`${recipe.name}-${idx}`}
-                    recipe={recipe}
-                    onClick={setSelectedRecipe}
-                    lang={lang}
-                  />
-                ))}
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded p-4 mb-6">
+                <p className="text-sm text-red-300">⚠️ {error}</p>
               </div>
+            )}
+
+            {/* Loading State */}
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <RecipeSkeleton count={6} />
+              </div>
+            ) : filteredRecipes.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredRecipes.map((recipe, idx) => (
+                    <RecipeCard
+                      key={`${recipe.name}-${idx}`}
+                      recipe={recipe}
+                      onClick={setSelectedRecipe}
+                      lang={lang}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  totalCount={totalCount}
+                  itemsPerPage={50}
+                  onPageChange={goToPage}
+                  hasNextPage={hasNextPage}
+                  hasPrevPage={hasPrevPage}
+                  loading={loading}
+                />
+              </>
             ) : (
               <div className="text-center py-24 bg-wurm-panel rounded border border-dashed border-wurm-border">
                 <div className="text-4xl mb-4 grayscale opacity-50">🥘</div>
@@ -305,38 +308,7 @@ const AppContent: React.FC = () => {
       <RecipeModal
         recipe={selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
-        onRefresh={() => {
-          // Refetch recipes after edit
-          const refetchRecipes = async () => {
-            const { data } = await supabase
-              .from('recipes')
-              .select('*')
-              .in('status', ['verified', 'legacy_verified']);
-
-            if (data) {
-              const dynamicRecipes: Recipe[] = data.map(d => ({
-                id: d.id,
-                name: d.name,
-                skill: d.skill || undefined,
-                container: d.container || undefined,
-                cooker: d.cooker || undefined,
-                mandatory: d.mandatory || undefined,
-                difficulty: d.difficulty || undefined,
-                status: d.status || undefined,
-                submitted_by: d.submitted_by || undefined,
-                screenshot_url: d.screenshot_url || undefined,
-                created_at: d.created_at || undefined,
-                legacy_key: d.legacy_key || undefined,
-                source: d.source || undefined,
-                hint_en: d.hint_en || undefined,
-                hint_pt: d.hint_pt || undefined,
-                hint_ru: d.hint_ru || undefined
-              }));
-              setRecipes(dynamicRecipes);
-            }
-          };
-          refetchRecipes();
-        }}
+        onRefresh={refresh}
         lang={lang}
         t={t}
       />
