@@ -34,7 +34,7 @@ const Stats: React.FC<StatsProps> = ({ recipes, t, lang, totalCount }) => {
         .select('skill');
 
       if (data && !error) {
-        setGlobalSkills(data.map(r => r.skill).filter(Boolean));
+        setGlobalSkills(data.map((r: any) => r.skill).filter(Boolean));
       }
     };
 
