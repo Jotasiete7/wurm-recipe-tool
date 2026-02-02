@@ -8,14 +8,11 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     isAdmin: boolean;
-    signIn: () => void; // Replaces email/pass
+    signIn: (email: string, password: string) => Promise<{ error?: string }>;
     signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// HUB URL (In production this should be env var)
-const HUB_URL = import.meta.env.VITE_HUB_URL || 'https://wurm-aguild-site.pages.dev';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [session, setSession] = useState<Session | null>(null);
@@ -23,55 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
 
-    // Initial Load & SSO Check
+    // Initial Load - Check for existing session
     useEffect(() => {
-        const handleAuth = async () => {
-            // 1. Check for Code in URL (Callback)
-            const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-
-            if (code) {
-                // Remove code from URL to clean up
-                window.history.replaceState({}, document.title, window.location.pathname);
-
-                try {
-                    // Exchange Code
-                    const { data, error } = await supabase.functions.invoke('sso-exchange', {
-                        body: { code, client_id: 'recipes_tool' }
-                    });
-
-                    if (error) {
-                        console.error('SSO Function Error:', error);
-                        throw error;
-                    }
-                    if (data?.error) {
-                        console.error('SSO Data Error:', data.error);
-                        throw new Error(data.error);
-                    }
-
-                    if (data?.session) {
-                        // Set Session!
-                        const { error: sessionError } = await supabase.auth.setSession({
-                            access_token: data.session.access_token,
-                            refresh_token: data.session.refresh_token
-                        });
-
-                        if (sessionError) {
-                            console.error('Set Session Error:', sessionError);
-                            throw sessionError;
-                        }
-                    } else {
-                        console.error('No session data returned from SSO');
-                        throw new Error('No session data returned');
-                    }
-
-                } catch (e: any) {
-                    console.error('SSO Exchange Error:', e);
-                    // Silent fail - user will see they're not logged in
-                }
-            }
-
-            // 2. Check Active Session
+        const initAuth = async () => {
             const { data: { session: existingSession } } = await supabase.auth.getSession();
             setSession(existingSession);
             setUser(existingSession?.user ?? null);
@@ -83,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         };
 
-        handleAuth();
+        initAuth();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
@@ -119,11 +70,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const signIn = () => {
-        // Redirect to Hub SSO
-        const redirectUri = window.location.origin; // Always redirect to root
-        const authUrl = `${HUB_URL}/sso/authorize?client_id=recipes_tool&redirect_uri=${encodeURIComponent(redirectUri)}`;
-        window.location.href = authUrl;
+    const signIn = async (email: string, password: string) => {
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                return { error: error.message };
+            }
+
+            return {};
+        } catch (e: any) {
+            return { error: e.message || 'Login failed' };
+        }
     };
 
     const signOut = async () => {
