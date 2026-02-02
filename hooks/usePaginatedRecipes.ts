@@ -60,7 +60,7 @@ export function usePaginatedRecipes({
             }
 
             if (data) {
-                const mappedRecipes: Recipe[] = data.map((d) => ({
+                const mappedRecipes: Recipe[] = data.map((d: any) => ({
                     id: d.id,
                     name: d.name,
                     skill: d.skill || '',

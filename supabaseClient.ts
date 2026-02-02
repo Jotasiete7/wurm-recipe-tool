@@ -11,9 +11,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
     // Create a dummy proxy that logs errors on any property access but doesn't crash on init
     const handler = {
-        get: function (target: any, prop: string) {
+        get: function (_target: any, prop: string) {
             if (prop === 'then') return undefined; // Avoid Promise behavior
-            return (...args: any[]) => {
+            return (..._args: any[]) => {
                 console.error(`Supabase client called without configuration (method: ${prop})`);
                 return { data: null, error: { message: 'Missing Supabase Configuration' } }; // Mock response
             };
