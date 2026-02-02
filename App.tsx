@@ -151,8 +151,8 @@ const AppContent: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
           {/* Sidebar Filters */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-wurm-panel rounded border border-wurm-border p-5 sticky top-24 shadow-xl shadow-black">
+          <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 scrollbar-hide">
+            <div className="bg-wurm-panel rounded border border-wurm-border p-5 shadow-xl shadow-black relative z-10">
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-wurm-border">
                 <h3 className="text-xs font-bold text-wurm-accent uppercase tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-wurm-accent animate-pulse"></span>
@@ -220,13 +220,13 @@ const AppContent: React.FC = () => {
 
             {/* Admin Stats Widget */}
             {isAdmin && (
-              <div className="hidden lg:block sticky top-24 mt-6 z-10">
+              <div className="hidden lg:block mt-6 z-10">
                 <UsageWidget />
               </div>
             )}
 
             {/* Stats Component - Show only on larger screens in sidebar */}
-            <div className="hidden lg:block sticky top-[450px]">
+            <div className="hidden lg:block">
               <Stats recipes={filteredRecipes} t={t} lang={lang} />
             </div>
           </div>
