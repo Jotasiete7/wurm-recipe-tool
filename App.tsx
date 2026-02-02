@@ -305,6 +305,38 @@ const AppContent: React.FC = () => {
       <RecipeModal
         recipe={selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
+        onRefresh={() => {
+          // Refetch recipes after edit
+          const refetchRecipes = async () => {
+            const { data } = await supabase
+              .from('recipes')
+              .select('*')
+              .in('status', ['verified', 'legacy_verified']);
+
+            if (data) {
+              const dynamicRecipes: Recipe[] = data.map(d => ({
+                id: d.id,
+                name: d.name,
+                skill: d.skill || undefined,
+                container: d.container || undefined,
+                cooker: d.cooker || undefined,
+                mandatory: d.mandatory || undefined,
+                difficulty: d.difficulty || undefined,
+                status: d.status || undefined,
+                submitted_by: d.submitted_by || undefined,
+                screenshot_url: d.screenshot_url || undefined,
+                created_at: d.created_at || undefined,
+                legacy_key: d.legacy_key || undefined,
+                source: d.source || undefined,
+                hint_en: d.hint_en || undefined,
+                hint_pt: d.hint_pt || undefined,
+                hint_ru: d.hint_ru || undefined
+              }));
+              setRecipes(dynamicRecipes);
+            }
+          };
+          refetchRecipes();
+        }}
         lang={lang}
         t={t}
       />
