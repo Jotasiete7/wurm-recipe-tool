@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Recipe, Language } from '../types';
-import { getEmoji } from '../utils/dataUtils';
+import { getEmoji, findRecipeMatch } from '../utils/dataUtils';
 import { translateSkill } from '../utils/translations';
 import { X, ChefHat, Box, Flame, Utensils, Edit3 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -134,22 +134,27 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
             {ingredients.length > 0 ? (
               <div className="bg-black/20 rounded border border-wurm-border/50">
                 <ul className="divide-y divide-wurm-border/50">
-                  {ingredients.map((item, idx) => (
-                    <li key={idx} className="p-3 sm:p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
-                      <div className="w-1.5 h-1.5 rounded-full bg-wurm-accent flex-shrink-0" />
-                      {allRecipeNames?.has(item.toLowerCase()) && onIngredientClick ? (
-                        <button
-                          onClick={() => onIngredientClick(item)}
-                          className="text-wurm-accent font-mono text-sm hover:underline text-left"
-                          title="View Recipe"
-                        >
-                          {item}
-                        </button>
-                      ) : (
-                        <span className="text-wurm-text font-mono text-sm">{item}</span>
-                      )}
-                    </li>
-                  ))}
+                  {ingredients.map((item, idx) => {
+                    // Find if this ingredient component is actually a recipe itself
+                    const matchedRecipeName = allRecipeNames && findRecipeMatch(item, allRecipeNames);
+
+                    return (
+                      <li key={idx} className="p-3 sm:p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
+                        <div className="w-1.5 h-1.5 rounded-full bg-wurm-accent flex-shrink-0" />
+                        {matchedRecipeName && onIngredientClick ? (
+                          <button
+                            onClick={() => onIngredientClick(matchedRecipeName)}
+                            className="text-wurm-accent font-mono text-sm hover:underline text-left"
+                            title={`View Recipe: ${matchedRecipeName}`}
+                          >
+                            {item}
+                          </button>
+                        ) : (
+                          <span className="text-wurm-text font-mono text-sm">{item}</span>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ) : (
