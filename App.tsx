@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { supabase } from './supabaseClient';
 import Header from './components/Header';
 import RecipeCard from './components/RecipeCard';
 import RecipeModal from './components/RecipeModal';
@@ -29,6 +30,9 @@ const AppContent: React.FC = () => {
     cooker: ''
   });
 
+  const [allRecipeNames, setAllRecipeNames] = useState<Set<string>>(new Set());
+  const [loadingRecipe, setLoadingRecipe] = useState(false);
+
   const [lang, setLang] = useState<Language>('en');
   const t = TRANSLATIONS[lang];
 
@@ -48,6 +52,54 @@ const AppContent: React.FC = () => {
     itemsPerPage: 50,
     searchTerm: filters.search,
   });
+
+  // --- Fetch All Recipe Names for Linking ---
+  useEffect(() => {
+    const fetchAllNames = async () => {
+      const { data } = await supabase
+        .from('recipes')
+        .select('name')
+        .in('status', ['verified', 'legacy_verified']);
+      
+      if (data) {
+        setAllRecipeNames(new Set(data.map(r => r.name.toLowerCase())));
+      }
+    };
+    fetchAllNames();
+  }, []);
+
+  const handleIngredientClick = async (recipeName: string) => {
+    try {
+      setLoadingRecipe(true);
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('*')
+        .ilike('name', recipeName)
+        .in('status', ['verified', 'legacy_verified'])
+        .single();
+
+      if (data) {
+         const mappedRecipe: Recipe = {
+            id: data.id,
+            name: data.name,
+            skill: data.skill || '',
+            container: data.container || '',
+            cooker: data.cooker || '',
+            mandatory: data.mandatory || '',
+            status: data.status,
+            hint_en: data.hint_en,
+            hint_pt: data.hint_pt,
+            hint_ru: data.hint_ru,
+            // Map other fields if necessary
+         };
+         setSelectedRecipe(mappedRecipe);
+      }
+    } catch (err) {
+      console.error("Error fetching linked recipe:", err);
+    } finally {
+      setLoadingRecipe(false);
+    }
+  };
 
   // --- Derived State (Options for Dropdowns) ---
   // Note: For dropdowns, we get unique values from ALL recipes, not just current page
@@ -309,8 +361,11 @@ const AppContent: React.FC = () => {
         recipe={selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
         onRefresh={refresh}
+        onRefresh={refresh}
         lang={lang}
         t={t}
+        allRecipeNames={allRecipeNames}
+        onIngredientClick={handleIngredientClick}
       />
 
       {showLoginModal && (

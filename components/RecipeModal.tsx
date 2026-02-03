@@ -12,9 +12,19 @@ interface RecipeModalProps {
   onRefresh?: () => void;
   lang: Language;
   t: any;
+  allRecipeNames?: Set<string>;
+  onIngredientClick?: (name: string) => void;
 }
 
-const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onRefresh, lang, t }) => {
+const RecipeModal: React.FC<RecipeModalProps> = ({
+  recipe,
+  onClose,
+  onRefresh,
+  lang,
+  t,
+  allRecipeNames,
+  onIngredientClick
+}) => {
   const { isAdmin } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
   // Prevent body scroll when modal is open
@@ -127,7 +137,17 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onRefresh, l
                   {ingredients.map((item, idx) => (
                     <li key={idx} className="p-3 sm:p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
                       <div className="w-1.5 h-1.5 rounded-full bg-wurm-accent flex-shrink-0" />
-                      <span className="text-wurm-text font-mono text-sm">{item}</span>
+                      {allRecipeNames?.has(item.toLowerCase()) && onIngredientClick ? (
+                        <button
+                          onClick={() => onIngredientClick(item)}
+                          className="text-wurm-accent font-mono text-sm hover:underline text-left"
+                          title="View Recipe"
+                        >
+                          {item}
+                        </button>
+                      ) : (
+                        <span className="text-wurm-text font-mono text-sm">{item}</span>
+                      )}
                     </li>
                   ))}
                 </ul>
