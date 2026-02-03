@@ -31,7 +31,6 @@ const AppContent: React.FC = () => {
   });
 
   const [allRecipeNames, setAllRecipeNames] = useState<Set<string>>(new Set());
-  const [loadingRecipe, setLoadingRecipe] = useState(false);
 
   const [lang, setLang] = useState<Language>('en');
   const t = TRANSLATIONS[lang];
@@ -60,9 +59,9 @@ const AppContent: React.FC = () => {
         .from('recipes')
         .select('name')
         .in('status', ['verified', 'legacy_verified']);
-      
+
       if (data) {
-        setAllRecipeNames(new Set(data.map(r => r.name.toLowerCase())));
+        setAllRecipeNames(new Set(data.map((r: { name: string }) => r.name.toLowerCase())));
       }
     };
     fetchAllNames();
@@ -70,8 +69,7 @@ const AppContent: React.FC = () => {
 
   const handleIngredientClick = async (recipeName: string) => {
     try {
-      setLoadingRecipe(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('recipes')
         .select('*')
         .ilike('name', recipeName)
@@ -79,25 +77,23 @@ const AppContent: React.FC = () => {
         .single();
 
       if (data) {
-         const mappedRecipe: Recipe = {
-            id: data.id,
-            name: data.name,
-            skill: data.skill || '',
-            container: data.container || '',
-            cooker: data.cooker || '',
-            mandatory: data.mandatory || '',
-            status: data.status,
-            hint_en: data.hint_en,
-            hint_pt: data.hint_pt,
-            hint_ru: data.hint_ru,
-            // Map other fields if necessary
-         };
-         setSelectedRecipe(mappedRecipe);
+        const mappedRecipe: Recipe = {
+          id: data.id,
+          name: data.name,
+          skill: data.skill || '',
+          container: data.container || '',
+          cooker: data.cooker || '',
+          mandatory: data.mandatory || '',
+          status: data.status,
+          hint_en: data.hint_en,
+          hint_pt: data.hint_pt,
+          hint_ru: data.hint_ru,
+          // Map other fields if necessary
+        };
+        setSelectedRecipe(mappedRecipe);
       }
     } catch (err) {
       console.error("Error fetching linked recipe:", err);
-    } finally {
-      setLoadingRecipe(false);
     }
   };
 
@@ -360,7 +356,6 @@ const AppContent: React.FC = () => {
       <RecipeModal
         recipe={selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
-        onRefresh={refresh}
         onRefresh={refresh}
         lang={lang}
         t={t}
