@@ -14,6 +14,7 @@ import { usePaginatedRecipes } from './hooks/usePaginatedRecipes';
 import { getUniqueValues } from './utils/dataUtils';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
+import DailyChallengeCard from './components/DailyChallengeCard';
 import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
 
 const AppContent: React.FC = () => {
@@ -123,6 +124,17 @@ const AppContent: React.FC = () => {
 
   const resetFilters = () => {
     setFilters({ search: '', skill: '', container: '', cooker: '' });
+  };
+
+  const handleDailyChallenge = async () => {
+    if (allRecipeNames.size === 0) return;
+
+    // Convert Set to Array and pick a random name
+    const namesArray = Array.from(allRecipeNames);
+    const randomName = namesArray[Math.floor(Math.random() * namesArray.length)];
+
+    // Reuse the existing ingredient click handler logic since it fetches by name
+    await handleIngredientClick(randomName);
   };
 
   return (
@@ -302,6 +314,13 @@ const AppContent: React.FC = () => {
             ) : filteredRecipes.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Daily Challenge Card - First Item */}
+                  <DailyChallengeCard
+                    onChallenge={handleDailyChallenge}
+                    lang={lang}
+                    t={t}
+                  />
+
                   {filteredRecipes.map((recipe, idx) => (
                     <RecipeCard
                       key={`${recipe.name}-${idx}`}

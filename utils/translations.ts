@@ -173,7 +173,6 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       skillCategory: "Categoria da Habilidade",
       allSkills: "Todas Habilidades",
       allContainers: "Todos Recipientes",
-      allContainers: "Todos Recipientes",
       allCookers: "Todos Cozinadores",
       dailyChallenge: "Desafio Diário",
       randomRecipe: "Receita Aleatória"
@@ -249,7 +248,6 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       noIngredients: "Обязательные ингредиенты не указаны.",
       skillCategory: "Категория навыка",
       allSkills: "Все навыки",
-      allContainers: "Все контейнеры",
       allContainers: "Все контейнеры",
       allCookers: "Все плиты",
       dailyChallenge: "Ежедневное испытание",
