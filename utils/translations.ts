@@ -28,6 +28,8 @@ interface TranslationData {
     allSkills: string;
     allContainers: string;
     allCookers: string;
+    dailyChallenge: string;
+    randomRecipe: string;
   };
   forms: {
     recipeName: string;
@@ -95,7 +97,9 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       skillCategory: "Skill Category",
       allSkills: "All Skills",
       allContainers: "All Containers",
-      allCookers: "All Cookers"
+      allCookers: "All Cookers",
+      dailyChallenge: "Daily Challenge",
+      randomRecipe: "Random Recipe"
     },
     forms: {
       recipeName: "Recipe Name *",
@@ -169,7 +173,10 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       skillCategory: "Categoria da Habilidade",
       allSkills: "Todas Habilidades",
       allContainers: "Todos Recipientes",
-      allCookers: "Todos Cozinadores"
+      allContainers: "Todos Recipientes",
+      allCookers: "Todos Cozinadores",
+      dailyChallenge: "Desafio Diário",
+      randomRecipe: "Receita Aleatória"
     },
     forms: {
       recipeName: "Nome da Receita *",
@@ -243,7 +250,10 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       skillCategory: "Категория навыка",
       allSkills: "Все навыки",
       allContainers: "Все контейнеры",
-      allCookers: "Все плиты"
+      allContainers: "Все контейнеры",
+      allCookers: "Все плиты",
+      dailyChallenge: "Ежедневное испытание",
+      randomRecipe: "Случайный рецепт"
     },
     forms: {
       recipeName: "Название рецепта *",
