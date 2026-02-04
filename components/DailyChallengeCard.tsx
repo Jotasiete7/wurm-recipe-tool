@@ -1,13 +1,13 @@
+
 import React from 'react';
 import { Sparkles } from 'lucide-react';
 
 interface DailyChallengeCardProps {
     onChallenge: () => void;
-    lang: string;
     t: any;
 }
 
-const DailyChallengeCard: React.FC<DailyChallengeCardProps> = ({ onChallenge, lang, t }) => {
+const DailyChallengeCard: React.FC<DailyChallengeCardProps> = ({ onChallenge, t }) => {
     return (
         <div
             onClick={onChallenge}

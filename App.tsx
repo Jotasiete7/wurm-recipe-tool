@@ -317,7 +317,6 @@ const AppContent: React.FC = () => {
                   {/* Daily Challenge Card - First Item */}
                   <DailyChallengeCard
                     onChallenge={handleDailyChallenge}
-                    lang={lang}
                     t={t}
                   />
 
