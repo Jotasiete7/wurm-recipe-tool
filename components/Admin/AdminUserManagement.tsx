@@ -41,7 +41,7 @@ export default function AdminUserManagement() {
         setLoading(true);
         const { data, error } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, email, username, full_name, global_role, created_at')
             .order('created_at', { ascending: false });
 
         if (error) {

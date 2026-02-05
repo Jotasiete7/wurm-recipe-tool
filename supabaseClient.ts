@@ -1,12 +1,10 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
 
-// Hardcoded fallback for production stability
-const FALLBACK_URL = 'https://gzhvqprdrtudyokhgxlj.supabase.co';
-const FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6aHZxcHJkcnR1ZHlva2hneGxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NTQ2MTUsImV4cCI6MjA4MzMzMDYxNX0.aSJIhfViQsb0dBjb5bOup49GCrQBt93uSkZySZAXcNo';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || FALLBACK_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || FALLBACK_KEY;
+// Environment variables are REQUIRED for security
+// No fallback credentials to prevent accidental exposure
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 let client;
 
@@ -54,4 +52,3 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = client;
-export const isFallbackClient = !supabaseUrl || !supabaseAnonKey || (supabaseUrl === FALLBACK_URL);
