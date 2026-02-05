@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../contexts/AuthContext';
 import { Trash2, KeyRound, Search, ShieldAlert, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface Profile {
     id: string;
-    email?: string; // We hope profiles has this, if not we show ID or Name
+    email?: string;
     username?: string;
     full_name?: string;
     global_role?: string;
@@ -13,7 +13,7 @@ interface Profile {
 }
 
 export default function AdminUserManagement() {
-    const { isAdmin, user: currentUser } = useAuth();
+    const { user: currentUser } = useAuth();
     const [users, setUsers] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -39,9 +39,6 @@ export default function AdminUserManagement() {
 
     const fetchUsers = async () => {
         setLoading(true);
-        // Note: 'profiles' usually is public or readable by authenticated.
-        // If 'email' is in profiles, great. If not, we might only show names.
-        // Assuming a standard updated profiles schema for now.
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
@@ -60,7 +57,7 @@ export default function AdminUserManagement() {
         if (!confirm(`Send password reset email to ${email}?`)) return;
 
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/reset-password', // Adjust if needed
+            redirectTo: window.location.origin + '/reset-password',
         });
 
         if (error) {
@@ -71,25 +68,13 @@ export default function AdminUserManagement() {
     };
 
     const handleDeleteUser = async (userId: string) => {
-        // DELETE requires generic Admin API or Edge Function usually.
-        // We will try a direct delete on 'profiles' first (if cascading deletes user),
-        // BUT usually auth.users delete triggers profile delete, not vice versa.
-        // Without an Edge Function for "deleteUser", we might be limited.
-        // For now, let's implement the UI and a placeholder action or try a direct RPC call if it existed.
-
-        // Since user asked for it, they might expect it to work. 
-        // We'll warn if we can't do it directly.
+        // Suppress lint for unused var until implemented
+        console.log("Delete user placeholder", userId);
 
         if (!confirm("DANGER: Are you sure you want to delete this user? This action CANNOT be undone.")) return;
 
-        // Placeholder for Delete Logic - this is likely to fail RLS on auth.users from client
+        // Placeholder for Delete Logic
         setMessage({ type: 'error', text: "Deleting users requires a Superadmin Edge Function (not yet configured). Please contact developer to add 'delete-user' function." });
-
-        /* 
-        // Future Implementation with Edge Function:
-        const { error } = await supabase.functions.invoke('delete-user', { body: { userId } });
-        if (error) ...
-        */
     };
 
     const filteredUsers = users.filter(u =>
