@@ -17,6 +17,7 @@ import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
 import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
 import AdminPanelModal from './components/Admin/AdminPanelModal'; // Added this
+import ResetPasswordModal from './components/ResetPasswordModal';
 
 const AppContent: React.FC = () => {
   // --- State ---
@@ -24,7 +25,7 @@ const AppContent: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false); // Added this
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, recoveryMode } = useAuth();
 
 
   const [filters, setFilters] = useState<FilterState>({
@@ -399,9 +400,12 @@ const AppContent: React.FC = () => {
           lang={lang}
         />
       )}
+
+      {recoveryMode && <ResetPasswordModal />}
     </div>
   );
 };
+
 
 const App: React.FC = () => (
   <AuthProvider>
