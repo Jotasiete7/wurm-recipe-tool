@@ -11,15 +11,19 @@ import RecipeSkeleton from './components/RecipeSkeleton';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import UsageWidget from './components/Admin/UsageWidget';
 import { usePaginatedRecipes } from './hooks/usePaginatedRecipes';
-import AdminPanelModal from './components/Admin/AdminPanelModal';
-// ... (imports)
+import { getUniqueValues } from './utils/dataUtils';
+import { TRANSLATIONS, translateSkill } from './utils/translations';
+import { Recipe, FilterState, Language } from './types';
+import DailyChallengeCard from './components/DailyChallengeCard';
+import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
+import AdminPanelModal from './components/Admin/AdminPanelModal'; // Added this
 
 const AppContent: React.FC = () => {
   // --- State ---
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
-  const [showAdminPanel, setShowAdminPanel] = useState(false); // NEW STATE
+  const [showAdminPanel, setShowAdminPanel] = useState(false); // Added this
   const { user, signOut, isAdmin } = useAuth();
 
   // ... (existing code)
