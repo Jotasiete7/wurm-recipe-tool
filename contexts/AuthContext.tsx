@@ -8,6 +8,8 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     isAdmin: boolean;
+    recoveryMode: boolean;
+    setRecoveryMode: (mode: boolean) => void;
     signIn: (email: string, password: string) => Promise<{ error?: string }>;
     signOut: () => Promise<void>;
 }
@@ -15,10 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [session, setSession] = useState<Session | null>(null);
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [recoveryMode, setRecoveryMode] = useState(false);
 
     // Initial Load - Check for existing session
     useEffect(() => {
@@ -36,7 +35,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         initAuth();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
+            console.log("Auth Event:", event);
+
+            if (event === 'PASSWORD_RECOVERY') {
+                setRecoveryMode(true);
+            }
+
             setSession(session);
             setUser(session?.user ?? null);
             if (session?.user) {
@@ -97,6 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         loading,
         isAdmin,
+        recoveryMode,
+        setRecoveryMode,
         signIn,
         signOut,
     };

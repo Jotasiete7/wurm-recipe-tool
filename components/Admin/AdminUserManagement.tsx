@@ -57,7 +57,7 @@ export default function AdminUserManagement() {
         if (!confirm(`Send password reset email to ${email}?`)) return;
 
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/reset-password',
+            redirectTo: (import.meta.env.VITE_SITE_URL || window.location.origin),
         });
 
         if (error) {
@@ -133,8 +133,8 @@ export default function AdminUserManagement() {
                                 </td>
                                 <td className="p-3">
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border ${profile.global_role === 'superadmin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                                            profile.global_role === 'admin' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                                'bg-wurm-border/50 text-wurm-muted border-wurm-border'
+                                        profile.global_role === 'admin' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                            'bg-wurm-border/50 text-wurm-muted border-wurm-border'
                                         }`}>
                                         {profile.global_role || 'member'}
                                     </span>
