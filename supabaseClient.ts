@@ -54,3 +54,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = client;
+export const isFallbackClient = !supabaseUrl || !supabaseAnonKey || (supabaseUrl === FALLBACK_URL);

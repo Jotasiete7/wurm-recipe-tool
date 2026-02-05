@@ -3,7 +3,11 @@ import { fetchUsageStats } from '../../utils/analytics';
 import { UsageStats } from '../../types';
 import { Database, Server } from 'lucide-react';
 
-const UsageWidget: React.FC = () => {
+interface UsageWidgetProps {
+    onManageUsers?: () => void;
+}
+
+const UsageWidget: React.FC<UsageWidgetProps> = ({ onManageUsers }) => {
     const [stats, setStats] = useState<UsageStats | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -53,6 +57,18 @@ const UsageWidget: React.FC = () => {
                     <Database size={10} />
                     <span>Total Recipes: <span className="text-white">{stats.recipes_count}</span></span>
                 </div>
+
+                {/* Admin Actions */}
+                {onManageUsers && (
+                    <div className="pt-3 border-t border-wurm-border/30 mt-2">
+                        <button
+                            onClick={onManageUsers}
+                            className="w-full py-1.5 bg-wurm-accent/10 border border-wurm-accent/20 text-wurm-accent text-[10px] font-bold uppercase tracking-widest hover:bg-wurm-accent hover:text-black transition-colors rounded"
+                        >
+                            Manage Users
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
