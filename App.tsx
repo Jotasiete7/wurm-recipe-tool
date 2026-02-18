@@ -368,9 +368,17 @@ const AppContent: React.FC = () => {
           <p className="text-wurm-muted text-[10px] font-mono uppercase tracking-widest">
             © {new Date().getFullYear()} A Guilda. Data based on Wurm Online.
           </p>
-          <div className="mt-4 flex justify-center gap-6 text-xs font-mono">
-            <a href="https://www.wurmpedia.com/index.php/Cooking" target="_blank" rel="noreferrer" className="text-wurm-accent hover:text-white transition-colors">Wurmpedia</a>
-            <a href="https://forum.wurmonline.com" target="_blank" rel="noreferrer" className="text-wurm-accent hover:text-white transition-colors">Official Forum</a>
+          {/* Ecosystem cross-links */}
+          <div className="mt-4 flex justify-center gap-6 text-xs font-mono text-wurm-muted uppercase tracking-widest">
+            <a href="https://wurm-aguild-site.pages.dev" className="hover:text-wurm-accent transition-colors">Portal</a>
+            <a href="https://wurm-analytics-journal.pages.dev" className="hover:text-wurm-accent transition-colors">Analytics</a>
+            <a href="https://wurm-mining-tool.pages.dev" className="hover:text-wurm-accent transition-colors">Mining</a>
+            <a href="https://wurm-liturgy.pages.dev" className="hover:text-wurm-accent transition-colors">Liturgy</a>
+          </div>
+          {/* External links */}
+          <div className="mt-3 flex justify-center gap-6 text-[10px] font-mono opacity-40">
+            <a href="https://www.wurmpedia.com/index.php/Cooking" target="_blank" rel="noreferrer noopener" className="hover:opacity-80 transition-opacity">Wurmpedia</a>
+            <a href="https://forum.wurmonline.com" target="_blank" rel="noreferrer noopener" className="hover:opacity-80 transition-opacity">Official Forum</a>
           </div>
         </div>
       </footer>
