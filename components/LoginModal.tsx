@@ -3,7 +3,7 @@ import { X, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
 
-import { isFallbackClient } from '../supabaseClient';
+
 
 interface LoginModalProps {
     onClose: () => void;
@@ -41,12 +41,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
             <div className="relative w-full max-w-sm bg-wurm-panel border border-wurm-border rounded-lg shadow-2xl p-6">
 
-                {isFallbackClient && (
-                    <div className="absolute -top-12 left-0 right-0 bg-amber-500/90 text-black text-[10px] font-mono font-bold px-4 py-2 rounded shadow-lg text-center">
-                        ⚠️ RUNNING IN FALLBACK MODE <br />
-                        Check your network or Cloudflare Environment Variables.
-                    </div>
-                )}
+
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-wurm-muted hover:text-white transition-colors"
