@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Network, ArrowLeft } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Language } from '../types';
+import EcosystemDropdown from './EcosystemDropdown';
 
 interface HeaderProps {
   t: any;
@@ -8,8 +9,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ t }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   return (
     <header className="sticky top-0 z-40 w-full bg-wurm-bg/90 backdrop-blur-md border-b border-wurm-border shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,41 +29,13 @@ const Header: React.FC<HeaderProps> = ({ t }) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`p-2 rounded-full transition-colors ${isMenuOpen ? 'text-wurm-accent bg-wurm-panel' : 'text-wurm-muted hover:text-wurm-text hover:bg-wurm-panel'}`}
-                title="Wurm Ecosystem"
-              >
-                <Network size={20} />
-              </button>
-
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-wurm-panel rounded border border-wurm-border shadow-xl py-2 animate-in fade-in slide-in-from-top-2 z-50">
-                  <div className="px-4 py-2 text-[10px] font-bold text-wurm-muted uppercase tracking-widest border-b border-wurm-border mb-1">
-                    {t.ui.ecosystem}
-                  </div>
-                  <a href="https://wurm-aguild-site.pages.dev" className="block px-4 py-2 text-sm text-wurm-text hover:bg-white/5 hover:text-wurm-accent transition-colors font-mono">
-                    🏠 {t.ui.mainSite}
-                  </a>
-                  <a href="https://wurm-mining-tool.pages.dev" className="block px-4 py-2 text-sm text-wurm-text hover:bg-white/5 hover:text-wurm-accent transition-colors font-mono">
-                    ⛏️ {t.ui.miningTool}
-                  </a>
-                  <div className="block px-4 py-2 text-sm font-medium text-wurm-accent bg-wurm-accent/10 font-mono border-l-2 border-wurm-accent">
-                    🍳 {t.ui.recipeGuide}
-                  </div>
-                </div>
-              )}
-            </div>
+            <EcosystemDropdown />
           </div>
         </div>
       </div>
-      {/* Mobile Backdrop for menu */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-[-1]" onClick={() => setIsMenuOpen(false)}></div>
-      )}
     </header>
   );
 };
 
 export default Header;
+
