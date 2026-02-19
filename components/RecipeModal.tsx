@@ -194,6 +194,11 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
             setShowEditModal(false);
             if (onRefresh) onRefresh();
           }}
+          onDelete={() => {
+            setShowEditModal(false);
+            onClose();
+            if (onRefresh) onRefresh();
+          }}
           t={t}
           lang={lang}
         />

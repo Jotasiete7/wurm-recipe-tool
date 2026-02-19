@@ -28,7 +28,8 @@ export const CONTAINERS = [
   'Sauce pan',
   'Frying pan',
   'Baking stone',
-  'Stone oven'
+  'Stone oven',
+  'Open Helmet'
 ] as const;
 
 export const COOKERS = [
