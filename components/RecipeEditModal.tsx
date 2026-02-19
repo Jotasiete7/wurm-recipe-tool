@@ -61,6 +61,19 @@ export default function RecipeEditModal({ recipe, onClose, onSave, onDelete, t, 
         if (!recipe.id) return;
         setDeleting(true);
         try {
+            // First, delete related audit logs (manual cascade)
+            const { error: auditError } = await supabase
+                .from('recipes_audit_log')
+                .delete()
+                .eq('recipe_id', recipe.id);
+
+            if (auditError) {
+                console.error('Failed to clear audit logs:', auditError);
+                // We proceed even if this fails, in case there were no logs or distinct error
+                // The main delete will catch constraint errors if they persist
+            }
+
+            // Then delete the recipe
             const { error } = await supabase
                 .from('recipes')
                 .delete()
@@ -68,14 +81,18 @@ export default function RecipeEditModal({ recipe, onClose, onSave, onDelete, t, 
 
             if (error) {
                 console.error('Delete error:', error);
-                setDeleting(false);
-                setConfirmDelete(false);
-                return;
+                // Check for foreign key constraint error specifically
+                if (error.code === '23503') {
+                    throw new Error('Cannot delete: this recipe is referenced by other records (e.g. logs).');
+                }
+                throw error;
             }
 
             onDelete();
         } catch (err) {
             console.error('Delete failed:', err);
+            // Show error in UI (could use a toast or alert, but for now log and reset pending state)
+            alert('Failed to delete recipe. Check console for details.');
             setDeleting(false);
             setConfirmDelete(false);
         }
