@@ -1,10 +1,13 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
 
-// Environment variables are REQUIRED for security
-// No fallback credentials to prevent accidental exposure
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Fallback credentials for production (if env vars are missing)
+// This ensures the app works on Cloudflare even if env vars are not set in the dashboard
+const FALLBACK_URL = 'https://gzhvqprdrtudyokhgxlj.supabase.co';
+const FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6aHZxcHJkcnR1ZHlva2hneGxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NTQ2MTUsImV4cCI6MjA4MzMzMDYxNX0.aSJIhfViQsb0dBjb5bOup49GCrQBt93uSkZySZAXcNo';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || FALLBACK_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || FALLBACK_KEY;
 
 let client;
 
@@ -36,6 +39,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
                         }),
                         eq: () => Promise.resolve({ data: null, error: null }),
                         single: () => Promise.resolve({ data: null, error: null }),
+                        update: () => ({ eq: () => Promise.resolve({ error: { message: 'Missing Configuration' } }) }),
+                        delete: () => ({ eq: () => Promise.resolve({ error: { message: 'Missing Configuration' } }) }),
+                        insert: () => Promise.resolve({ error: { message: 'Missing Configuration' } }),
                     })
                 });
             }
@@ -52,3 +58,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = client;
+export const isFallbackClient = !import.meta.env.VITE_SUPABASE_URL && (supabaseUrl === FALLBACK_URL);
