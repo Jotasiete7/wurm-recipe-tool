@@ -63,7 +63,7 @@ export default function RecipeEditModal({ recipe, onClose, onSave, onDelete, t, 
         try {
             // First, delete related audit logs (manual cascade)
             const { error: auditError } = await supabase
-                .from('recipes_audit_log')
+                .from('recipe_audit_log')
                 .delete()
                 .eq('recipe_id', recipe.id);
 
