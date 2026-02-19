@@ -18,6 +18,7 @@ import DailyChallengeCard from './components/DailyChallengeCard';
 import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
 import AdminPanelModal from './components/Admin/AdminPanelModal'; // Added this
 import ResetPasswordModal from './components/ResetPasswordModal';
+import EcosystemDropdown from './components/EcosystemDropdown';
 
 const AppContent: React.FC = () => {
   // --- State ---
@@ -146,7 +147,10 @@ const AppContent: React.FC = () => {
       {/* Top Bar for Auth & Lang */}
       <div className="fixed top-4 right-4 z-50 flex gap-3 text-[10px] font-mono tracking-widest text-wurm-muted uppercase bg-black/80 p-1.5 rounded-full border border-wurm-border backdrop-blur-sm shadow-xl">
         {/* Language Switcher */}
-        <div className="flex bg-wurm-panel rounded-full px-1 border border-wurm-border/50">
+        <div className="flex bg-wurm-panel rounded-full px-1 border border-wurm-border/50 items-center">
+          <div className="border-r border-wurm-border/50 pr-1 mr-1">
+            <EcosystemDropdown />
+          </div>
           <button onClick={() => setLang('en')} className={`px-2 py-1 rounded-full transition-all ${lang === 'en' ? 'text-white font-bold' : 'hover:text-wurm-accent'}`}>EN</button>
           <button onClick={() => setLang('pt')} className={`px-2 py-1 rounded-full transition-all ${lang === 'pt' ? 'text-white font-bold' : 'hover:text-wurm-accent'}`}>PT</button>
           <button onClick={() => setLang('ru')} className={`px-2 py-1 rounded-full transition-all ${lang === 'ru' ? 'text-white font-bold' : 'hover:text-wurm-accent'}`}>RU</button>

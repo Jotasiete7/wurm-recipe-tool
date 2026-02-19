@@ -1,8 +1,6 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Language } from '../types';
-import EcosystemDropdown from './EcosystemDropdown';
-
 interface HeaderProps {
   t: any;
   lang: Language;
@@ -28,9 +26,6 @@ const Header: React.FC<HeaderProps> = ({ t }) => {
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <EcosystemDropdown />
-          </div>
         </div>
       </div>
     </header>
