@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked } from 'lucide-react';
+import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────
 // CANONICAL ECOSYSTEM DROPDOWN — A Guilda (Recipes Version)
@@ -38,6 +38,12 @@ const ECOSYSTEM_TOOLS = [
         href: 'https://wurm-liturgy.pages.dev',
         icon: BookMarked,
     },
+    {
+        id: 'carpentry',
+        label: 'Carpentry',
+        href: 'https://wurm-carpentry-tool.pages.dev',
+        icon: Hammer,
+    },
 ] as const;
 
 // ← Change this to the id of the current project
@@ -64,8 +70,8 @@ const EcosystemDropdown: React.FC = () => {
                 onClick={() => setIsOpen(prev => !prev)}
                 title="Ecossistema A Guilda"
                 className={`p-2 rounded-full transition-colors ${isOpen
-                        ? 'text-wurm-accent bg-wurm-panel'
-                        : 'text-wurm-muted hover:text-wurm-text hover:bg-wurm-panel'
+                    ? 'text-wurm-accent bg-wurm-panel'
+                    : 'text-wurm-muted hover:text-wurm-text hover:bg-wurm-panel'
                     }`}
             >
                 <Network size={20} />
