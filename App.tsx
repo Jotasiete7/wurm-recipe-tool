@@ -378,7 +378,7 @@ const AppContent: React.FC = () => {
             <a href="https://wurm-analytics-journal.pages.dev" className="hover:text-wurm-accent transition-colors">Analytics</a>
             <a href="https://wurm-mining-tool.pages.dev" className="hover:text-wurm-accent transition-colors">Mining</a>
             <a href="https://wurm-liturgy.pages.dev" className="hover:text-wurm-accent transition-colors">Liturgy</a>
-            <a href="https://wurm-badges.pages.dev" className="hover:text-wurm-accent transition-colors">Badges</a>
+            <a href="https://wurm-aguilda-badges.pages.dev" className="hover:text-wurm-accent transition-colors">Badges</a>
           </div>
           {/* External links */}
           <div className="mt-3 flex justify-center gap-6 text-[10px] font-mono opacity-40">

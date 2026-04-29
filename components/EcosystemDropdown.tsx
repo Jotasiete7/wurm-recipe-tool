@@ -47,7 +47,7 @@ const ECOSYSTEM_TOOLS = [
     {
         id: 'badges',
         label: 'Guilda Badges',
-        href: 'https://wurm-badges.pages.dev',
+        href: 'https://wurm-aguilda-badges.pages.dev',
         icon: Shield,
     },
 ] as const;
