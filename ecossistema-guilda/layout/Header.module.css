@@ -79,6 +79,9 @@
 }
 
 /* ── Right Section ── */
+.rightSection {
+    display: flex;
+    align-items: center;
     gap: var(--ag-gap-md);
 }
 
