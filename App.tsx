@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { Header as AgHeader } from '@antigravity/layout/Header';
-import { LanguageSwitch } from '@antigravity/modules/LanguageSwitch';
-import agStyles from '@antigravity/layout/Header.module.css';
+import { Header as AgHeader } from '@ecossistema-guilda/layout/Header';
+import { LanguageSwitch } from '@ecossistema-guilda/modules/LanguageSwitch';
+import agStyles from '@ecossistema-guilda/layout/Header.module.css';
 import RecipeCard from './components/RecipeCard';
 import RecipeModal from './components/RecipeModal';
 import Stats from './components/Stats';

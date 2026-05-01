@@ -7,7 +7,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@antigravity': path.resolve(__dirname, '../antigravity')
+      '@ecossistema-guilda': path.resolve(__dirname, '../ecossistema-guilda'),
+      'lucide-react': path.resolve(__dirname, 'node_modules/lucide-react'),
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom')
     }
   },
   server: {
