@@ -17,7 +17,7 @@ import { getUniqueValues } from './utils/dataUtils';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
-import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
+import { Search, RotateCcw, User, LogOut, Plus } from 'lucide-react';
 import AdminPanelModal from './components/Admin/AdminPanelModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
 
