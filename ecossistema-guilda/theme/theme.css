@@ -1,0 +1,70 @@
+/* 
+   ANTIGRAVITY DESIGN SYSTEM - THEME LAYER 
+   Centralize variables for all ecosystem projects.
+*/
+
+:root {
+    /* ── Header Structure ── */
+    --ag-header-height: 60px;
+    --ag-header-blur: 8px;
+    --ag-header-z-index: 50;
+
+    /* ── Typography ── */
+    --ag-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --ag-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --ag-font-serif: 'Playfair Display', Georgia, serif;
+
+    /* ── Colors: Surface ── */
+    --ag-bg-header: rgba(5, 5, 5, 0.95);
+    --ag-border-color: #262626;
+    
+    /* ── Colors: Text ── */
+    --ag-text-main: #e5e5e5;
+    --ag-text-muted: #737373;
+    --ag-text-dim: #404040;
+
+    /* ── Colors: Accent ── */
+    /* This can be overridden locally by each page */
+    --ag-accent: #d4b483; /* Guild Gold Default */
+    --ag-accent-dim: #8a7453;
+    
+    /* ── Spacing & Radius ── */
+    --ag-radius-sm: 4px;
+    --ag-radius-md: 6px;
+    --ag-gap-sm: 0.5rem;
+    --ag-gap-md: 1rem;
+    
+    /* ── Transitions ── */
+    --ag-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --ag-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base resets for the header and modules to ensure consistency */
+.ag-reset {
+    font-family: var(--ag-font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+}
+
+.ag-reset *, .ag-reset *::before, .ag-reset *::after {
+    box-sizing: border-box;
+}
+
+/* ── Common Animations ── */
+@keyframes ag-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ag-animate-fade {
+    animation: ag-fade-in var(--ag-transition-normal) forwards;
+}
+
+/* ── Glassmorphism ── */
+.ag-glass {
+    background: var(--ag-bg-header);
+    backdrop-filter: blur(var(--ag-header-blur));
+    -webkit-backdrop-filter: blur(var(--ag-header-blur));
+    border-bottom: 1px solid var(--ag-border-color);
+}
