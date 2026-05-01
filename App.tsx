@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import Header from './components/Header';
+import { Header as AgHeader } from '@antigravity/layout/Header';
+import { LanguageSwitch } from '@antigravity/modules/LanguageSwitch';
+import agStyles from '@antigravity/layout/Header.module.css';
 import RecipeCard from './components/RecipeCard';
 import RecipeModal from './components/RecipeModal';
 import Stats from './components/Stats';
@@ -16,9 +18,8 @@ import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
 import { Search, RotateCcw, User, LogOut, Plus, Shield, Crown } from 'lucide-react';
-import AdminPanelModal from './components/Admin/AdminPanelModal'; // Added this
+import AdminPanelModal from './components/Admin/AdminPanelModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
-import EcosystemDropdown from './components/EcosystemDropdown';
 
 const AppContent: React.FC = () => {
   // --- State ---
@@ -144,62 +145,50 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-wurm-bg text-wurm-text selection:bg-wurm-accent selection:text-black">
-      {/* Top Bar for Auth & Lang */}
-      <div className="fixed top-4 right-4 z-50 flex gap-3 text-[10px] font-mono tracking-widest text-wurm-muted uppercase bg-black/80 p-1.5 rounded-full border border-wurm-border backdrop-blur-sm shadow-xl">
-        {/* Language Switcher */}
-        <div className="flex bg-wurm-panel rounded-full px-1 border border-wurm-border/50 items-center">
-          <div className="border-r border-wurm-border/50 pr-1 mr-1">
-            <EcosystemDropdown />
-          </div>
-          <button onClick={() => setLang('en')} className={`px-2 py-1 rounded-full transition-all ${lang === 'en' ? 'text-white font-bold' : 'hover:text-wurm-accent'}`}>EN</button>
-          <button onClick={() => setLang('pt')} className={`px-2 py-1 rounded-full transition-all ${lang === 'pt' ? 'text-white font-bold' : 'hover:text-wurm-accent'}`}>PT</button>
-          <button onClick={() => setLang('ru')} className={`px-2 py-1 rounded-full transition-all ${lang === 'ru' ? 'text-white font-bold' : 'hover:text-wurm-accent'}`}>RU</button>
-        </div>
-
-        {/* Auth Actions */}
-        <div className="flex items-center pl-2 border-l border-wurm-border/50 gap-2">
-          {/* Submit Button (Only Verified Users) */}
-          {user && (
-            <button
-              onClick={() => setShowSubmitModal(true)}
-              className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 border-r border-wurm-border/50 pr-3"
-              title="Submit New Recipe"
-            >
-              <Plus size={14} />
-              <span className="hidden sm:inline">Add Recipe</span>
-            </button>
-          )}
-
-          {user ? (
-            <div className="flex items-center gap-2">
-              {/* Role Badge - Links to Main Site VIP Area */}
-              <a
-                href="https://wurm-aguild-site.pages.dev"
-                target="_blank"
-                rel="noreferrer"
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-bold transition-transform hover:scale-105
-                    ${isAdmin ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'text-wurm-accent hover:bg-wurm-accent/10'}
-                `}
-                title="Go to Guild VIP Area"
-              >
-                {isAdmin ? <Crown size={12} /> : <Shield size={12} />}
-                <span className="hidden sm:inline">{isAdmin ? 'Super Admin' : 'Member'}</span>
-              </a>
-
-              <button onClick={() => signOut()} className="p-1 hover:text-red-400 transition-colors" title="Sair">
-                <LogOut size={14} />
-              </button>
-            </div>
-          ) : (
-            <button onClick={() => setShowLoginModal(true)} className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2">
+      <AgHeader 
+        currentToolId="recipes"
+        brandSubName={t.ui.recipes}
+        lang={lang as 'en' | 'pt'}
+        auth={{
+          user: user ? { name: user.email?.split('@')[0], image: undefined } : null,
+          isAdmin,
+          loginButton: (
+            <button onClick={() => setShowLoginModal(true)} className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted">
               <User size={14} />
               <span className="hidden sm:inline">LOGIN</span>
             </button>
-          )}
-        </div>
-      </div>
-
-      <Header t={t} lang={lang} />
+          ),
+          logoutForm: (
+            <button onClick={() => signOut()} className="p-1 hover:text-red-400 transition-colors text-wurm-muted" title="Sair">
+              <LogOut size={14} />
+            </button>
+          )
+        }}
+        extraModules={
+          <>
+            {user && (
+              <button
+                onClick={() => setShowSubmitModal(true)}
+                className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted border-r border-wurm-border/50 pr-3"
+                title="Submit New Recipe"
+              >
+                <Plus size={14} />
+                <span className="hidden sm:inline">Add Recipe</span>
+              </button>
+            )}
+            <LanguageSwitch 
+              lang={lang} 
+              onLanguageChange={(l) => setLang(l as Language)} 
+              languages={[
+                { code: 'en', label: 'EN' },
+                { code: 'pt', label: 'PT' },
+                { code: 'ru', label: 'RU' }
+              ]}
+              styles={agStyles}
+            />
+          </>
+        }
+      />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -372,14 +361,7 @@ const AppContent: React.FC = () => {
           <p className="text-wurm-muted text-[10px] font-mono uppercase tracking-widest">
             © {new Date().getFullYear()} A Guilda. Data based on Wurm Online.
           </p>
-          {/* Ecosystem cross-links */}
-          <div className="mt-4 flex justify-center gap-6 text-xs font-mono text-wurm-muted uppercase tracking-widest">
-            <a href="https://wurm-aguild-site.pages.dev" className="hover:text-wurm-accent transition-colors">Portal</a>
-            <a href="https://wurm-analytics-journal.pages.dev" className="hover:text-wurm-accent transition-colors">Analytics</a>
-            <a href="https://wurm-mining-tool.pages.dev" className="hover:text-wurm-accent transition-colors">Mining</a>
-            <a href="https://wurm-liturgy.pages.dev" className="hover:text-wurm-accent transition-colors">Liturgy</a>
-            <a href="https://wurm-aguilda-badges.pages.dev" className="hover:text-wurm-accent transition-colors">Badges</a>
-          </div>
+          {/* Ecosystem links removed as they are now in the Header */}
           {/* External links */}
           <div className="mt-3 flex justify-center gap-6 text-[10px] font-mono opacity-40">
             <a href="https://www.wurmpedia.com/index.php/Cooking" target="_blank" rel="noreferrer noopener" className="hover:opacity-80 transition-opacity">Wurmpedia</a>

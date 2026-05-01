@@ -19,8 +19,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@antigravity/*": ["../antigravity/*"]
+    },
     "types": ["vite/client"]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["src", "*.tsx", "*.ts"],
   "exclude": ["node_modules"]
 }
