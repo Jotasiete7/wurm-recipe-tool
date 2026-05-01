@@ -79,10 +79,30 @@
 }
 
 /* ── Right Section ── */
-.rightSection {
+    gap: var(--ag-gap-md);
+}
+
+.userSection {
     display: flex;
     align-items: center;
-    gap: var(--ag-gap-md);
+    gap: 0.75rem;
+}
+
+.userName {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ag-text-muted);
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    object-fit: cover;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* ── Ecosystem Menu Styles (Shared) ── */

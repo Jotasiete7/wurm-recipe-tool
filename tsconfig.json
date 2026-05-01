@@ -21,10 +21,10 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@antigravity/*": ["../antigravity/*"]
+      "@ecossistema-guilda/*": ["./ecossistema-guilda/*"]
     },
     "types": ["vite/client"]
   },
-  "include": ["src", "*.tsx", "*.ts"],
+  "include": ["src", "*.tsx", "*.ts", "ecossistema-guilda/**/*.ts", "ecossistema-guilda/**/*.tsx"],
   "exclude": ["node_modules"]
 }

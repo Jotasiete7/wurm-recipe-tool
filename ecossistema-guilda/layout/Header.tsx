@@ -88,14 +88,14 @@ export const Header: React.FC<HeaderProps> = ({
                 {extraModules}
                 
                 {auth?.user ? (
-                    <div className="flex items-center gap-4">
+                    <div className={styles.userSection}>
                         <div className="hidden sm:flex items-center gap-2">
-                            <span className="text-[10px] uppercase tracking-widest text-white/40">{auth.user.name}</span>
+                            <span className={styles.userName}>{auth.user.name}</span>
                             {auth.user.image && (
                                 <img 
                                     src={auth.user.image} 
                                     alt={auth.user.name || "Avatar"} 
-                                    className="w-8 h-8 rounded-full border border-white/10" 
+                                    className={styles.avatar} 
                                 />
                             )}
                         </div>
