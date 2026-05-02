@@ -55,7 +55,7 @@ const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     {
         id: 'badges',
         label: 'Guilda Badges',
-        href: 'https://wurm-guilda-badges.pages.dev', // Fallback URL
+        href: 'https://wurm-aguilda-badges.pages.dev', // Fallback URL
         icon: Shield,
     },
 ];
