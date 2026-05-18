@@ -61,10 +61,7 @@ export default function RecipeForm({
             return;
         }
 
-        if (requireScreenshot && !formData.screenshot) {
-            setSubmitError(t.forms.proofScreenshot + ' required');
-            return;
-        }
+
 
         setLoading(true);
 

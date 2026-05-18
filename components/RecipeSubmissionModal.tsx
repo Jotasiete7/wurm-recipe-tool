@@ -26,27 +26,28 @@ export default function RecipeSubmissionModal({ onClose, t, lang }: RecipeSubmis
         hint_pt: string;
         hint_ru: string;
     }) => {
-        if (!data.screenshot) {
-            throw new Error(t.forms.proofScreenshot + ' required');
+        let publicUrl = null;
+
+        if (data.screenshot) {
+            // 1. Upload Screenshot
+            const fileExt = data.screenshot.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `recipe-proofs/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(filePath, data.screenshot);
+
+            if (uploadError) {
+                console.error('Upload error:', uploadError);
+                throw new Error('Failed to upload screenshot. Please try again.');
+            }
+
+            const {
+                data: { publicUrl: url },
+            } = supabase.storage.from('images').getPublicUrl(filePath);
+            publicUrl = url;
         }
-
-        // 1. Upload Screenshot
-        const fileExt = data.screenshot.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `recipe-proofs/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-            .from('images')
-            .upload(filePath, data.screenshot);
-
-        if (uploadError) {
-            console.error('Upload error:', uploadError);
-            throw new Error('Failed to upload screenshot. Please try again.');
-        }
-
-        const {
-            data: { publicUrl },
-        } = supabase.storage.from('images').getPublicUrl(filePath);
 
         // 2. Insert into Database
         const { error: insertError } = await supabase.from('recipes').insert({
