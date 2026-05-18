@@ -93,7 +93,7 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
-    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+        <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
     <script>
       kofiWidgetOverlay.draw('aguildanode', {
         'type': 'floating-chat',
@@ -102,6 +102,20 @@
         'floating-chat.donateButton.text-color': '#323842'
       });
     </script>
+    <style>
+      .floatingchat-container-wrap {
+        left: unset !important;
+        right: 16px !important;
+      }
+      .floatingchat-container-wrap-mobi {
+        left: unset !important;
+        right: 16px !important;
+      }
+      .floating-chat-kofi-popup-iframe {
+        left: unset !important;
+        right: 16px !important;
+      }
+    </style>
   </body>
 
 </html>

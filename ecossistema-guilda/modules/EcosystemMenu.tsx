@@ -53,6 +53,12 @@ const ECOSYSTEM_TOOLS: EcosystemTool[] = [
         icon: Gavel,
     },
     {
+        id: 'wall-decay',
+        label: { en: 'Wall Decay', pt: 'Dano de Muralhas' },
+        href: 'https://wurm-wall-decay-calculator.pages.dev',
+        icon: Hourglass,
+    },
+    {
         id: 'badges',
         label: 'Guilda Badges',
         href: 'https://wurm-aguilda-badges.pages.dev', // Fallback URL
