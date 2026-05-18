@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
                     color: #000000 !important;
                     transform: scale(1.02);
                 }
-            `}} /> className={`${styles.header} ag-reset`} style={headerStyle}>
+            `}} />
             <div className={styles.brandContainer}>
                 <EcosystemMenu currentId={currentToolId} lang={lang} styles={styles} />
                 <div className={styles.divider}></div>
