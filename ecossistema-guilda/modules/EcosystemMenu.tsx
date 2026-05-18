@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer, Shield, Gavel } from 'lucide-react';
+import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer, Shield, Gavel, Hourglass } from 'lucide-react';
 
 // Common types to avoid dependencies
 interface EcosystemTool {

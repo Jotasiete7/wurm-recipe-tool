@@ -93,6 +93,15 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
-</body>
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+      kofiWidgetOverlay.draw('aguildanode', {
+        'type': 'floating-chat',
+        'floating-chat.donateButton.text': 'Support Us',
+        'floating-chat.donateButton.background-color': '#fcbf47',
+        'floating-chat.donateButton.text-color': '#323842'
+      });
+    </script>
+  </body>
 
 </html>

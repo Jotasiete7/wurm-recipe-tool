@@ -1,4 +1,5 @@
 import React from 'react';
+import { Coffee } from 'lucide-react';
 import { ArrowLeft } from 'lucide-react';
 import { Language } from '../types';
 interface HeaderProps {

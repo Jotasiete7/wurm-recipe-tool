@@ -1,4 +1,5 @@
 import React from 'react';
+import { Coffee } from 'lucide-react';
 import styles from './Header.module.css';
 import { EcosystemMenu } from '../modules/EcosystemMenu';
 
@@ -85,6 +86,15 @@ export const Header: React.FC<HeaderProps> = ({
             )}
 
             <div className={styles.rightSection}>
+                <a 
+                    href="https://ko-fi.com/aguildanode" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fcbf47] hover:bg-[#fcbf47]/90 text-[#323842] hover:text-black font-bold rounded text-xs transition-all tracking-wider uppercase font-mono shadow-sm shrink-0 mr-2"
+                >
+                    <Coffee size={14} className="animate-pulse shrink-0" />
+                    <span className="hidden sm:inline">Support Us</span>
+                </a>
                 {extraModules}
                 
                 {auth?.user ? (
