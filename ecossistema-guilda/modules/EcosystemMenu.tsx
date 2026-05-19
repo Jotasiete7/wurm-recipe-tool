@@ -4,7 +4,7 @@ import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer, Shield
 // Common types to avoid dependencies
 interface EcosystemTool {
     id: string;
-    label: string | { en: string; pt: string };
+    label: string;
     href: string;
     icon: any;
 }
@@ -24,13 +24,13 @@ const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     },
     {
         id: 'recipes',
-        label: { en: 'Recipes', pt: 'Receitas' },
+        label: 'Recipes',
         href: 'https://wurm-recipe-tool.pages.dev',
         icon: BookOpen,
     },
     {
         id: 'mining',
-        label: { en: 'Mining', pt: 'Mineração' },
+        label: 'Mining',
         href: 'https://wurm-mining-tool.pages.dev',
         icon: Pickaxe,
     },
@@ -47,21 +47,21 @@ const ECOSYSTEM_TOOLS: EcosystemTool[] = [
         icon: Hammer,
     },
     {
-        id: 'auction',
-        label: { en: 'Auction', pt: 'Leilões' },
-        href: 'https://wurm-auction-helper.pages.dev',
-        icon: Gavel,
-    },
-    {
         id: 'wall-decay',
-        label: { en: 'Wall Decay', pt: 'Dano de Muralhas' },
+        label: 'Wall Decay',
         href: 'https://wurm-wall-decay-calculator.pages.dev',
         icon: Hourglass,
     },
     {
+        id: 'auction',
+        label: 'Auction',
+        href: 'https://wurm-auction-helper.pages.dev',
+        icon: Gavel,
+    },
+    {
         id: 'badges',
         label: 'Guilda Badges',
-        href: 'https://wurm-aguilda-badges.pages.dev', // Fallback URL
+        href: 'https://wurm-aguilda-badges.pages.dev',
         icon: Shield,
     },
 ];
@@ -86,11 +86,6 @@ export const EcosystemMenu: React.FC<EcosystemMenuProps> = ({ currentId, lang = 
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    const getLabel = (tool: EcosystemTool) => {
-        if (typeof tool.label === 'string') return tool.label;
-        return lang === 'pt' ? tool.label.pt : tool.label.en;
-    };
-
     return (
         <div ref={ref} className={styles.dropdownContainer}>
             <button
@@ -109,14 +104,14 @@ export const EcosystemMenu: React.FC<EcosystemMenuProps> = ({ currentId, lang = 
                     {ECOSYSTEM_TOOLS.map((tool) => {
                         const isCurrent = tool.id === currentId;
                         const Icon = tool.icon;
-                        const label = getLabel(tool);
+                        const label = tool.label;
 
                         return isCurrent ? (
                             <div key={tool.id} className={styles.menuItemCurrent}>
                                 <Icon size={14} />
                                 <span>{label}</span>
                                 <span className={styles.currentBadge}>
-                                    {lang === 'pt' ? 'aqui' : 'here'}
+                                    here
                                 </span>
                             </div>
                         ) : (
