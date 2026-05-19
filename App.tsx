@@ -18,7 +18,7 @@ import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
 import { Search, RotateCcw, User, LogOut, Plus } from 'lucide-react';
-import AdminPanelModal from './components/Admin/AdminPanelModal';
+
 import ResetPasswordModal from './components/ResetPasswordModal';
 
 const AppContent: React.FC = () => {
@@ -26,7 +26,7 @@ const AppContent: React.FC = () => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
-  const [showAdminPanel, setShowAdminPanel] = useState(false); // Added this
+
   const { user, signOut, isAdmin, recoveryMode } = useAuth();
 
 
@@ -278,7 +278,7 @@ const AppContent: React.FC = () => {
             {/* Admin Stats Widget */}
             {isAdmin && (
               <div className="hidden lg:block mt-6 z-10">
-                <UsageWidget onManageUsers={() => setShowAdminPanel(true)} />
+                <UsageWidget />
               </div>
             )}
 
@@ -384,9 +384,7 @@ const AppContent: React.FC = () => {
         <LoginModal onClose={() => setShowLoginModal(false)} />
       )}
 
-      {showAdminPanel && (
-        <AdminPanelModal onClose={() => setShowAdminPanel(false)} />
-      )}
+
 
       {showSubmitModal && (
         <RecipeSubmissionModal
