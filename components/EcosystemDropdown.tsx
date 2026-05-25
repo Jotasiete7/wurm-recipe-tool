@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer, Shield, Gavel } from 'lucide-react';
+import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer, Shield, Gavel, Map } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────
 // CANONICAL ECOSYSTEM DROPDOWN — A Guilda (Recipes Version)
@@ -55,6 +55,12 @@ const ECOSYSTEM_TOOLS = [
         label: 'Guilda Badges',
         href: 'https://wurm-aguilda-badges.pages.dev',
         icon: Shield,
+    },
+    {
+        id: 'prospect',
+        label: 'Prospect',
+        href: 'https://wurm-prospect-tool.pages.dev',
+        icon: Map,
     },
 ] as const;
 
