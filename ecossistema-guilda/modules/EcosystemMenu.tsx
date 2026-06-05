@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer, Shield, Gavel, Hourglass, Map } from 'lucide-react';
+import { Network, Home, BookOpen, Pickaxe, LineChart, BookMarked, Hammer, Shield, Gavel, Hourglass, Map, Gem } from 'lucide-react';
 
 // Common types to avoid dependencies
 interface EcosystemTool {
@@ -69,6 +69,12 @@ const ECOSYSTEM_TOOLS: EcosystemTool[] = [
         label: 'Prospect',
         href: 'https://wurm-prospect-tool.pages.dev',
         icon: Map,
+    },
+    {
+        id: 'relic-appraiser',
+        label: 'Relic Appraiser',
+        href: 'https://wurm-relic-appraiser.pages.dev',
+        icon: Gem,
     },
 ];
 
