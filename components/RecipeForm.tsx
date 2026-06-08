@@ -28,6 +28,7 @@ interface RecipeFormProps {
     onSubmitterNameChange?: (name: string) => void;
     t: any;
     lang: Language;
+    readOnly?: boolean;
 }
 
 export default function RecipeForm({
@@ -39,7 +40,8 @@ export default function RecipeForm({
     submitterName = '',
     onSubmitterNameChange,
     t,
-    lang
+    lang,
+    readOnly = false
 }: RecipeFormProps) {
     const {
         formData,
@@ -109,8 +111,9 @@ export default function RecipeForm({
                     type="text"
                     value={formData.name}
                     onChange={(e) => updateField('name', e.target.value)}
+                    disabled={readOnly}
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.name ? 'border-red-500' : 'border-wurm-border'
-                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
+                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all disabled:opacity-70 disabled:cursor-not-allowed`}
                     placeholder={t.forms.recipeNamePlaceholder}
                 />
                 {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
@@ -124,8 +127,9 @@ export default function RecipeForm({
                 <select
                     value={formData.skill}
                     onChange={(e) => updateField('skill', e.target.value)}
+                    disabled={readOnly}
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.skill ? 'border-red-500' : 'border-wurm-border'
-                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
+                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all disabled:opacity-70 disabled:cursor-not-allowed`}
                 >
                     <option value="">{t.forms.selectSkill}</option>
                     {SKILLS.map((s) => (
@@ -145,8 +149,9 @@ export default function RecipeForm({
                 <select
                     value={formData.container}
                     onChange={(e) => updateField('container', e.target.value)}
+                    disabled={readOnly}
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.container ? 'border-red-500' : 'border-wurm-border'
-                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
+                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all disabled:opacity-70 disabled:cursor-not-allowed`}
                 >
                     <option value="">{t.forms.selectContainer}</option>
                     {CONTAINERS.map((c) => (
@@ -166,8 +171,9 @@ export default function RecipeForm({
                 <select
                     value={formData.cooker}
                     onChange={(e) => updateField('cooker', e.target.value)}
+                    disabled={readOnly}
                     className={`w-full px-4 py-2.5 rounded bg-black/50 border ${errors.cooker ? 'border-red-500' : 'border-wurm-border'
-                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all`}
+                        } text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all disabled:opacity-70 disabled:cursor-not-allowed`}
                 >
                     <option value="">{t.forms.selectCooker}</option>
                     {COOKERS.map((c) => (
@@ -230,13 +236,15 @@ export default function RecipeForm({
                     <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider">
                         {t.forms.ingredients}
                     </label>
-                    <button
-                        type="button"
-                        onClick={addIngredient}
-                        className="text-xs text-wurm-accent hover:text-white transition-colors flex items-center gap-1"
-                    >
-                        <Plus size={14} /> {t.forms.addIngredient}
-                    </button>
+                    {!readOnly && (
+                        <button
+                            type="button"
+                            onClick={addIngredient}
+                            className="text-xs text-wurm-accent hover:text-white transition-colors flex items-center gap-1"
+                        >
+                            <Plus size={14} /> {t.forms.addIngredient}
+                        </button>
+                    )}
                 </div>
 
                 <div className="space-y-2">
@@ -246,17 +254,19 @@ export default function RecipeForm({
                                 type="text"
                                 value={ing.name}
                                 onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
+                                disabled={readOnly}
                                 placeholder={t.forms.ingredientNamePlaceholder}
-                                className="flex-1 px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
+                                className="flex-1 px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
                             />
                             <input
                                 type="text"
                                 value={ing.qty}
                                 onChange={(e) => updateIngredient(idx, 'qty', e.target.value)}
+                                disabled={readOnly}
                                 placeholder={t.forms.qtyPlaceholder}
-                                className="w-24 px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none"
+                                className="w-24 px-3 py-2 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
                             />
-                            {formData.ingredients.length > 1 && (
+                            {!readOnly && formData.ingredients.length > 1 && (
                                 <button
                                     type="button"
                                     onClick={() => removeIngredient(idx)}

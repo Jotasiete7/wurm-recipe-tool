@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, AlertTriangle } from 'lucide-react';
+import { X, Loader2, AlertTriangle, Upload } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import RecipeForm from './RecipeForm';
 import { Language, Recipe } from '../types';
@@ -303,17 +303,46 @@ export default function RecipeSubmissionModal({ onClose, t, lang, initialFiles =
                         </div>
                     )}
 
-                    <RecipeForm
-                        initialRecipe={initialRecipe}
-                        onSubmit={handleSubmit}
-                        submitLabel={t.forms.submitRecipe}
-                        requireScreenshot={false} // Hidden because OCR ingested the file already
-                        showSubmitterName={true}
-                        submitterName={submitterName}
-                        onSubmitterNameChange={handleNickChange}
-                        t={t}
-                        lang={lang}
-                    />
+                    {!initialRecipe ? (
+                        <div className="flex flex-col items-center justify-center py-12 px-6 border border-dashed border-wurm-border rounded-lg text-center bg-black/10">
+                            <Upload className="w-10 h-10 text-wurm-accent mb-3 animate-[pulse_2s_infinite]" />
+                            <h3 className="text-xs font-bold text-wurm-accent uppercase tracking-widest font-serif mb-2">
+                                {lang === 'pt' ? 'Arraste ou Cole o Print da Receita' : 'Drag or Paste Recipe Screenshot'}
+                            </h3>
+                            <p className="text-[10px] text-wurm-muted font-mono max-w-sm leading-relaxed mb-5">
+                                {lang === 'pt' 
+                                    ? '// Abra a receita expandida no jogo, tire o print (F12) e arraste-o aqui ou simplesmente use Ctrl+V.' 
+                                    : '// Open the expanded recipe in-game, take a screenshot (F12) and drag it here or simply press Ctrl+V.'}
+                            </p>
+                            <label className="px-5 py-2 bg-wurm-accent/15 border border-wurm-accent text-wurm-accent text-[10px] font-bold uppercase tracking-widest rounded hover:bg-wurm-accent hover:text-black cursor-pointer transition-all">
+                                {t.forms.chooseFile}
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files.length > 0) {
+                                            handleFilesIngested(Array.from(e.target.files));
+                                        }
+                                    }}
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
+                    ) : (
+                        <RecipeForm
+                            initialRecipe={initialRecipe}
+                            onSubmit={handleSubmit}
+                            submitLabel={t.forms.submitRecipe}
+                            requireScreenshot={false}
+                            showSubmitterName={true}
+                            submitterName={submitterName}
+                            onSubmitterNameChange={handleNickChange}
+                            t={t}
+                            lang={lang}
+                            readOnly={true} // Safe & tamper-proof
+                        />
+                    )}
 
                     {/* OCR Loading Overlay */}
                     {ocrLoading && (
