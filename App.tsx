@@ -11,6 +11,7 @@ import RecipeSubmissionModal from './components/RecipeSubmissionModal';
 import Pagination from './components/Pagination';
 import RecipeSkeleton from './components/RecipeSkeleton';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import UsageWidget from './components/Admin/UsageWidget';
 import { usePaginatedRecipes } from './hooks/usePaginatedRecipes';
 import { getUniqueValues } from './utils/dataUtils';
@@ -550,7 +551,9 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => (
   <AuthProvider>
-    <AppContent />
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
   </AuthProvider>
 );
 

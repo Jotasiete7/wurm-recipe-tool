@@ -3,6 +3,7 @@ import { X, Trash2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Recipe, Language } from '../types';
 import RecipeForm from './RecipeForm';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface RecipeEditModalProps {
     recipe: Recipe;
@@ -14,6 +15,7 @@ interface RecipeEditModalProps {
 }
 
 export default function RecipeEditModal({ recipe, onClose, onSave, onDelete, t, lang }: RecipeEditModalProps) {
+    const { showNotification } = useNotification();
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
@@ -80,7 +82,7 @@ export default function RecipeEditModal({ recipe, onClose, onSave, onDelete, t, 
             onDelete();
         } catch (err) {
             console.error('Delete failed:', err);
-            alert(err instanceof Error ? err.message : 'Failed to delete recipe');
+            showNotification(err instanceof Error ? err.message : 'Failed to delete recipe', 'error');
             setDeleting(false);
             setConfirmDelete(false);
         }

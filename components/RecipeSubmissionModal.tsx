@@ -5,6 +5,7 @@ import RecipeForm from './RecipeForm';
 import { Language, Recipe } from '../types';
 import { parseOcrText, mergeParses } from '../utils/ocrParser';
 import { findBestRecipeMatch } from '../utils/recipeMatcher';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface RecipeSubmissionModalProps {
     onClose: () => void;
@@ -14,6 +15,7 @@ interface RecipeSubmissionModalProps {
 }
 
 export default function RecipeSubmissionModal({ onClose, t, lang, initialFiles = null }: RecipeSubmissionModalProps) {
+    const { showNotification } = useNotification();
     const [submitterName, setSubmitterName] = useState(() => {
         return localStorage.getItem('wurm_contributor_nick') || '';
     });
@@ -236,7 +238,7 @@ export default function RecipeSubmissionModal({ onClose, t, lang, initialFiles =
             }
         }
 
-        alert(alertMessage);
+        showNotification(alertMessage, 'success');
         onClose();
     };
 

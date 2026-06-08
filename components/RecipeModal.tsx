@@ -6,6 +6,7 @@ import { X, ChefHat, Box, Flame, Utensils, Edit3 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import RecipeEditModal from './RecipeEditModal';
 import { supabase } from '../supabaseClient';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface RecipeModalProps {
   recipe: Recipe | null;
@@ -27,6 +28,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
   onIngredientClick
 }) => {
   const { isAdmin } = useAuth();
+  const { showNotification } = useNotification();
   const [showEditModal, setShowEditModal] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(5);
@@ -87,10 +89,10 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 
       if (data && !data.success) {
         if (data.message === 'already_voted_today') {
-          alert(t.ui.alreadyVoted);
+          showNotification(t.ui.alreadyVoted, 'info');
           setVotedToday(true);
         } else {
-          alert(data.message);
+          showNotification(data.message, 'info');
         }
         return;
       }
@@ -102,10 +104,10 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       votedList[recipe.id] = new Date().toISOString().split('T')[0];
       localStorage.setItem('wurm_voted_recipes', JSON.stringify(votedList));
 
-      alert(t.ui.voteSuccess);
+      showNotification(t.ui.voteSuccess, 'success');
     } catch (err) {
       console.error(err);
-      alert('Failed to cast vote.');
+      showNotification('Failed to cast vote.', 'error');
     } finally {
       setVoting(false);
     }
