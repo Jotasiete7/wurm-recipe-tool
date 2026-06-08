@@ -370,3 +370,9 @@ where r.status in ('verified', 'legacy_verified')
 group by rp.source
 order by recipe_count desc
 limit 20;
+
+-- 10. Update RLS select policy on recipes to allow reading pending recipes
+drop policy if exists "Public read verified recipes" on recipes;
+create policy "Public read verified recipes" on recipes for
+select using (status in ('verified', 'legacy_verified', 'pending'));
+
