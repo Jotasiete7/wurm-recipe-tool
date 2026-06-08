@@ -89,6 +89,23 @@ export function parseOcrText(rawText: string): Partial<Recipe> {
       continue;
     }
 
+    // Check for Tool: and Target: (top-level tool-action recipes)
+    if (!inSubRecipe) {
+      if (/tool:\s*(.*)/i.test(line)) {
+        if (cookers.length === 0) cookers.push('None');
+        if (containers.length === 0) containers.push('None');
+        continue;
+      }
+      if (/target:\s*(.*)/i.test(line)) {
+        const parsedTarget = line.split(':')[1]?.trim();
+        const cleanedTarget = cleanOcrPrefix(parsedTarget);
+        if (cleanedTarget && !ingredients.includes(cleanedTarget)) {
+          ingredients.push(cleanedTarget);
+        }
+        continue;
+      }
+    }
+
     // State boundaries for the main recipe
     if (/cookers/i.test(line) && state !== 'in_mandatory') {
       state = 'in_cookers';
