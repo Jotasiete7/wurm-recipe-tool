@@ -83,11 +83,11 @@ const TopRecipesCard: React.FC<TopRecipesCardProps> = ({ onRecipeClick, t, lang 
   const visibleRecipes = expanded ? ranking : ranking.slice(0, 3);
 
   return (
-    <div className={`bg-wurm-panel rounded border border-wurm-border p-5 shadow-lg shadow-black/50 flex flex-col justify-between transition-all duration-300 ${
+    <div className={`bg-wurm-panel rounded border border-wurm-border py-3 px-4 shadow-lg shadow-black/50 flex flex-col justify-between transition-all duration-300 ${
       expanded ? 'h-auto min-h-[160px]' : 'h-[160px] overflow-hidden'
     }`}>
       <div>
-        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-wurm-border/50">
+        <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-wurm-border/50">
           <Trophy size={16} className="text-yellow-500 animate-[pulse_2s_infinite]" />
           <div>
             <h3 className="text-xs font-bold text-wurm-accent uppercase tracking-widest font-serif">
@@ -104,12 +104,12 @@ const TopRecipesCard: React.FC<TopRecipesCardProps> = ({ onRecipeClick, t, lang 
             <Loader2 size={16} className="text-wurm-muted animate-spin" />
           </div>
         ) : ranking.length > 0 ? (
-          <ul className="space-y-1.5">
+          <ul className="space-y-1">
             {visibleRecipes.map((item, idx) => (
               <li
                 key={item.id}
                 onClick={() => handleItemClick(item)}
-                className="flex items-center justify-between text-xs hover:bg-white/5 px-2 py-1 rounded cursor-pointer transition-colors group"
+                className="flex items-center justify-between text-xs hover:bg-white/5 px-2 py-0.5 rounded cursor-pointer transition-colors group"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-wurm-muted font-mono w-3 text-right">
@@ -135,7 +135,7 @@ const TopRecipesCard: React.FC<TopRecipesCardProps> = ({ onRecipeClick, t, lang 
       {ranking.length > 3 && (
         <button
           onClick={() => setExpanded(prev => !prev)}
-          className="mt-4 text-[9px] text-wurm-accent hover:text-white transition-colors text-center w-full font-mono uppercase tracking-widest pt-2 border-t border-wurm-border/50"
+          className="mt-2 text-[9px] text-wurm-accent hover:text-white transition-colors text-center w-full font-mono uppercase tracking-widest pt-1.5 border-t border-wurm-border/50"
         >
           {expanded 
             ? (lang === 'pt' ? '[ Recolher ]' : '[ Collapse ]') 

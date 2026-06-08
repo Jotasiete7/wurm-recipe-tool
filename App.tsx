@@ -19,6 +19,7 @@ import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
 import SubmitRecipeOcrCard from './components/SubmitRecipeOcrCard';
 import TopRecipesCard from './components/TopRecipesCard';
+import PendingInfoCard from './components/PendingInfoCard';
 import { Search, RotateCcw, User, LogOut, Plus } from 'lucide-react';
 
 import ResetPasswordModal from './components/ResetPasswordModal';
@@ -386,6 +387,15 @@ const AppContent: React.FC = () => {
                     />
                   </>
                 )}
+                {pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
+                  <>
+                    <PendingInfoCard lang={lang} />
+                    <SubmitRecipeOcrCard
+                      onFileSelect={handleOcrFileSelect}
+                      t={t}
+                    />
+                  </>
+                )}
                 <RecipeSkeleton count={6} />
               </div>
             ) : filteredRecipes.length > 0 ? (
@@ -405,6 +415,15 @@ const AppContent: React.FC = () => {
                         onRecipeClick={setSelectedRecipe}
                         t={t}
                         lang={lang}
+                      />
+                    </>
+                  )}
+                  {pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
+                    <>
+                      <PendingInfoCard lang={lang} />
+                      <SubmitRecipeOcrCard
+                        onFileSelect={handleOcrFileSelect}
+                        t={t}
                       />
                     </>
                   )}
