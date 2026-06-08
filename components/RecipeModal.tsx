@@ -91,6 +91,8 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
         if (data.message === 'already_voted_today') {
           showNotification(t.ui.alreadyVoted, 'info');
           setVotedToday(true);
+        } else if (data.message === 'cannot_confirm_own_recipe') {
+          showNotification(t.ui.cannotConfirmOwnRecipe, 'error');
         } else {
           showNotification(data.message, 'info');
         }
@@ -104,7 +106,13 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       votedList[recipe.id] = new Date().toISOString().split('T')[0];
       localStorage.setItem('wurm_voted_recipes', JSON.stringify(votedList));
 
-      showNotification(t.ui.voteSuccess, 'success');
+      if (data && data.message === 'recipe_confirmed') {
+        showNotification(lang === 'pt' ? 'Receita confirmada com sucesso! Ela agora faz parte do livro.' : 'Recipe confirmed successfully! It is now part of the book.', 'success');
+      } else {
+        showNotification(t.ui.voteSuccess, 'success');
+      }
+      
+      if (onRefresh) onRefresh(); // Trigger refresh to show the updated status in the ui!
     } catch (err) {
       console.error(err);
       showNotification('Failed to cast vote.', 'error');

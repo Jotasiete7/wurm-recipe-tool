@@ -37,6 +37,7 @@ interface TranslationData {
     viewPending: string;
     voteSuccess: string;
     alreadyVoted: string;
+    cannotConfirmOwnRecipe: string;
     noPendingRecipes: string;
     uniqueRecipe: string;
     uniqueRecipeBy: string;
@@ -123,6 +124,7 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       viewPending: "View",
       voteSuccess: "Vote recorded! 👍",
       alreadyVoted: "You already voted today for this recipe.",
+      cannotConfirmOwnRecipe: "You cannot vote to confirm your own recipe.",
       noPendingRecipes: "No pending recipes at the moment.",
       uniqueRecipe: "⭐ Unique Recipe",
       uniqueRecipeBy: "Recipe created by {creator} on {server}"
@@ -215,6 +217,7 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       viewPending: "Ver",
       voteSuccess: "Voto registrado! 👍",
       alreadyVoted: "Você já votou hoje nesta receita.",
+      cannotConfirmOwnRecipe: "Você não pode votar para confirmar sua própria receita.",
       noPendingRecipes: "Nenhuma receita pendente no momento.",
       uniqueRecipe: "⭐ Receita Única",
       uniqueRecipeBy: "Receita criada por {creator} em {server}"
@@ -307,6 +310,7 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       viewPending: "Посмотреть",
       voteSuccess: "Голос учтен! 👍",
       alreadyVoted: "Вы уже голосовали за этот рецепт сегодня.",
+      cannotConfirmOwnRecipe: "Вы не можете голосовать за подтверждение собственного рецепта.",
       noPendingRecipes: "В данный момент нет рецептов на верификации.",
       uniqueRecipe: "⭐ Уникальный рецепт",
       uniqueRecipeBy: "Рецепт создан {creator} на сервере {server}"
