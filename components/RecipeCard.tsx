@@ -18,7 +18,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
   return (
     <div 
       onClick={() => onClick(recipe)}
-      className="group relative bg-wurm-panel rounded border border-wurm-border hover:border-wurm-accent/40 transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg h-[160px] flex flex-col justify-between"
+      className="group relative bg-wurm-panel rounded border border-wurm-border hover:border-wurm-accent/40 transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg h-[170px] flex flex-col justify-between"
     >
       {/* Status Badges */}
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1 z-10">

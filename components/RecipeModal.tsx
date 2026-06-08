@@ -162,10 +162,22 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
             </div>
             <div className="flex-1 text-center sm:text-left">
               <h2 className="text-3xl font-bold font-serif text-wurm-accent mb-2 tracking-tight">{recipe.name}</h2>
-              <div className="flex flex-wrap gap-2 justify-center sm:justify-start opacity-90">
+              <div className="flex flex-wrap gap-2 justify-center sm:justify-start opacity-90 mt-2">
                 {recipe.skill && (
                   <span className="px-3 py-1 bg-wurm-accent/10 border border-wurm-accent/20 rounded text-xs font-mono font-bold text-wurm-accent uppercase tracking-wider">
                     {translateSkill(recipe.skill, lang)}
+                  </span>
+                )}
+                {recipe.status === 'pending' && (
+                  <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs font-mono font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>⏳</span>
+                    <span>{lang === 'pt' ? 'Pendente' : (lang === 'ru' ? 'В ожидании' : 'Pending')}</span>
+                  </span>
+                )}
+                {(recipe.status === 'verified' || recipe.status === 'legacy_verified') && (
+                  <span className="px-3 py-1 bg-wurm-success/10 border border-wurm-success/30 rounded text-xs font-mono font-bold text-wurm-success uppercase tracking-wider flex items-center gap-1.5">
+                    <span>✓</span>
+                    <span>{lang === 'pt' ? 'Verificada' : (lang === 'ru' ? 'Проверено' : 'Verified')}</span>
                   </span>
                 )}
               </div>
@@ -286,7 +298,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
         </div>
 
         {/* Footer with Thumbs Up */}
-        {recipe.id && (recipe.status === 'verified' || recipe.status === 'legacy_verified') && (
+        {recipe.id && (recipe.status === 'verified' || recipe.status === 'legacy_verified' || recipe.status === 'pending') && (
           <div className="border-t border-wurm-border bg-black/40 px-6 py-4 flex items-center justify-between">
             <span className="text-[10px] text-wurm-muted font-mono uppercase tracking-wider">
               {votedToday 

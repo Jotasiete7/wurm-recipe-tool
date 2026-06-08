@@ -84,7 +84,7 @@ const TopRecipesCard: React.FC<TopRecipesCardProps> = ({ onRecipeClick, t, lang 
 
   return (
     <div className={`bg-wurm-panel rounded border border-wurm-border py-3 px-4 shadow-lg shadow-black/50 flex flex-col justify-between transition-all duration-300 ${
-      expanded ? 'h-auto min-h-[160px]' : 'h-[160px] overflow-hidden'
+      expanded ? 'h-auto min-h-[170px]' : 'h-[170px] overflow-hidden'
     }`}>
       <div>
         <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-wurm-border/50">

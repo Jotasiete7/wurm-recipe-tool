@@ -25,7 +25,7 @@ const PendingInfoCard: React.FC<PendingInfoCardProps> = ({ lang }) => {
   const { title, desc } = content[lang] || content.en;
 
   return (
-    <div className="bg-amber-950/10 border border-amber-500/30 rounded p-4 sm:p-5 shadow-lg shadow-black/50 h-[160px] flex flex-col justify-between overflow-hidden">
+    <div className="bg-amber-950/10 border border-amber-500/30 rounded p-4 sm:p-5 shadow-lg shadow-black/50 h-[170px] flex flex-col justify-between overflow-hidden">
       <div>
         <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-amber-500/20">
           <Info size={16} className="text-amber-500 animate-[pulse_2s_infinite]" />

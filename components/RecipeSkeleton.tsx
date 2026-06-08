@@ -10,7 +10,7 @@ export default function RecipeSkeleton({ count = 6 }: RecipeSkeletonProps) {
             {Array.from({ length: count }).map((_, idx) => (
                 <div
                     key={idx}
-                    className="bg-wurm-panel border border-wurm-border rounded p-4 sm:p-5 animate-pulse h-[160px] flex flex-col justify-between"
+                    className="bg-wurm-panel border border-wurm-border rounded p-4 sm:p-5 animate-pulse h-[170px] flex flex-col justify-between"
                 >
                     {/* Header */}
                     <div className="flex items-start gap-4">
