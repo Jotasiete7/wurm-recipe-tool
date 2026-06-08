@@ -80,10 +80,12 @@ const TopRecipesCard: React.FC<TopRecipesCardProps> = ({ onRecipeClick, t, lang 
     return monthsEn[currentMonthIdx];
   };
 
-  const visibleRecipes = expanded ? ranking : ranking.slice(0, 4);
+  const visibleRecipes = expanded ? ranking : ranking.slice(0, 3);
 
   return (
-    <div className="bg-wurm-panel rounded border border-wurm-border p-5 shadow-lg shadow-black/50 flex flex-col justify-between h-full min-h-[160px]">
+    <div className={`bg-wurm-panel rounded border border-wurm-border p-5 shadow-lg shadow-black/50 flex flex-col justify-between transition-all duration-300 ${
+      expanded ? 'h-auto min-h-[160px]' : 'h-[160px] overflow-hidden'
+    }`}>
       <div>
         <div className="flex items-center gap-2 mb-3 pb-2 border-b border-wurm-border/50">
           <Trophy size={16} className="text-yellow-500 animate-[pulse_2s_infinite]" />
@@ -130,7 +132,7 @@ const TopRecipesCard: React.FC<TopRecipesCardProps> = ({ onRecipeClick, t, lang 
         )}
       </div>
 
-      {ranking.length > 4 && (
+      {ranking.length > 3 && (
         <button
           onClick={() => setExpanded(prev => !prev)}
           className="mt-4 text-[9px] text-wurm-accent hover:text-white transition-colors text-center w-full font-mono uppercase tracking-widest pt-2 border-t border-wurm-border/50"

@@ -64,7 +64,7 @@ const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect,
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
       onDrop={handleDrop}
-      className={`group relative bg-wurm-panel rounded border transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg flex flex-col justify-between h-full min-h-[160px] ${
+      className={`group relative bg-wurm-panel rounded border transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg flex flex-col justify-between h-[160px] ${
         isDragActive
           ? 'border-wurm-accent bg-wurm-accent/5 scale-[1.01]'
           : 'border-wurm-border hover:border-wurm-accent/40'

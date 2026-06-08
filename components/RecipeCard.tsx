@@ -18,7 +18,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
   return (
     <div 
       onClick={() => onClick(recipe)}
-      className="group relative bg-wurm-panel rounded border border-wurm-border hover:border-wurm-accent/40 transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg"
+      className="group relative bg-wurm-panel rounded border border-wurm-border hover:border-wurm-accent/40 transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg h-[160px] flex flex-col justify-between"
     >
       {/* Status Badges */}
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1 z-10">
@@ -50,7 +50,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
 
       <div className="absolute inset-y-0 left-0 w-0.5 bg-wurm-accent opacity-0 group-hover:opacity-100 transition-opacity" />
       
-      <div className="p-4 sm:p-5">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-black/40 rounded border border-wurm-border text-2xl group-hover:scale-105 transition-transform group-hover:border-wurm-accent/30">
             {getEmoji(recipe.name)}
@@ -84,7 +84,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
           </div>
         </div>
 
-        <div className="mt-4 pl-16">
+        <div className="pl-16">
           <p className="text-xs text-wurm-muted font-mono line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
             {ingredients}
           </p>

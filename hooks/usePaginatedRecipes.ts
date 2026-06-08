@@ -5,6 +5,7 @@ import { Recipe } from '../types';
 interface UsePaginatedRecipesOptions {
     itemsPerPage?: number;
     searchTerm?: string;
+    pendingOnly?: boolean;
 }
 
 interface UsePaginatedRecipesResult {
@@ -25,6 +26,7 @@ interface UsePaginatedRecipesResult {
 export function usePaginatedRecipes({
     itemsPerPage = 50,
     searchTerm = '',
+    pendingOnly = false,
 }: UsePaginatedRecipesOptions = {}): UsePaginatedRecipesResult {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
@@ -40,10 +42,15 @@ export function usePaginatedRecipes({
             const start = page * itemsPerPage;
             const end = start + itemsPerPage - 1;
 
+            let statuses = ['verified', 'legacy_verified', 'pending'];
+            if (pendingOnly) {
+                statuses = ['pending'];
+            }
+
             let query = supabase
                 .from('recipes')
                 .select('*', { count: 'exact' })
-                .in('status', ['verified', 'legacy_verified', 'pending'])
+                .in('status', statuses)
                 .order('name', { ascending: true });
 
             // Server-side search if search term exists
@@ -94,18 +101,18 @@ export function usePaginatedRecipes({
         } finally {
             setLoading(false);
         }
-    }, [page, itemsPerPage, searchTerm]);
+    }, [page, itemsPerPage, searchTerm, pendingOnly]);
 
     useEffect(() => {
         fetchRecipes();
     }, [fetchRecipes]);
 
-    // Reset to page 0 when search term changes
+    // Reset to page 0 when search term or pendingOnly changes
     useEffect(() => {
         if (page !== 0) {
             setPage(0);
         }
-    }, [searchTerm]); // Don't include page in deps to avoid infinite loop
+    }, [searchTerm, pendingOnly]); // Don't include page in deps to avoid infinite loop
 
     const totalPages = Math.ceil(totalCount / itemsPerPage);
     const hasNextPage = page < totalPages - 1;

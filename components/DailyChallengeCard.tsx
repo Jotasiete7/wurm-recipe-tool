@@ -11,7 +11,7 @@ const DailyChallengeCard: React.FC<DailyChallengeCardProps> = ({ onChallenge, t 
     return (
         <div
             onClick={onChallenge}
-            className="group relative bg-black/20 rounded border border-wurm-accent/30 hover:border-wurm-accent hover:bg-wurm-accent/5 transition-all duration-300 cursor-pointer overflow-hidden shadow-lg shadow-black/50 h-full min-h-[160px] flex flex-col items-center justify-center text-center p-6"
+            className="group relative bg-black/20 rounded border border-wurm-accent/30 hover:border-wurm-accent hover:bg-wurm-accent/5 transition-all duration-300 cursor-pointer overflow-hidden shadow-lg shadow-black/50 h-[160px] flex flex-col items-center justify-center text-center p-6"
         >
             <div className="absolute inset-0 bg-gradient-to-br from-wurm-accent/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
 

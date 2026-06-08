@@ -68,6 +68,7 @@ const AppContent: React.FC = () => {
   } = usePaginatedRecipes({
     itemsPerPage: 50,
     searchTerm: filters.search,
+    pendingOnly: pendingOnly,
   });
 
   // --- Fetch All Recipe Names for Linking ---
@@ -153,14 +154,13 @@ const AppContent: React.FC = () => {
   // Search is handled server-side in usePaginatedRecipes
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
-      const matchPending = !pendingOnly || r.status === 'pending';
       const matchSkill = !filters.skill || r.skill === filters.skill;
       const matchContainer = !filters.container || (r.container && r.container.includes(filters.container));
       const matchCooker = !filters.cooker || (r.cooker && r.cooker.includes(filters.cooker));
 
-      return matchPending && matchSkill && matchContainer && matchCooker;
+      return matchSkill && matchContainer && matchCooker;
     });
-  }, [recipes, pendingOnly, filters.skill, filters.container, filters.cooker]);
+  }, [recipes, filters.skill, filters.container, filters.cooker]);
 
   // --- Handlers ---
   const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -366,33 +366,48 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {/* Dashboard Row */}
-            {!pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <DailyChallengeCard
-                  onChallenge={handleDailyChallenge}
-                  t={t}
-                />
-                <SubmitRecipeOcrCard
-                  onFileSelect={handleOcrFileSelect}
-                  t={t}
-                />
-                <TopRecipesCard
-                  onRecipeClick={setSelectedRecipe}
-                  t={t}
-                  lang={lang}
-                />
-              </div>
-            )}
-
             {/* Loading State */}
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {!pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
+                  <>
+                    <DailyChallengeCard
+                      onChallenge={handleDailyChallenge}
+                      t={t}
+                    />
+                    <SubmitRecipeOcrCard
+                      onFileSelect={handleOcrFileSelect}
+                      t={t}
+                    />
+                    <TopRecipesCard
+                      onRecipeClick={setSelectedRecipe}
+                      t={t}
+                      lang={lang}
+                    />
+                  </>
+                )}
                 <RecipeSkeleton count={6} />
               </div>
             ) : filteredRecipes.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {!pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
+                    <>
+                      <DailyChallengeCard
+                        onChallenge={handleDailyChallenge}
+                        t={t}
+                      />
+                      <SubmitRecipeOcrCard
+                        onFileSelect={handleOcrFileSelect}
+                        t={t}
+                      />
+                      <TopRecipesCard
+                        onRecipeClick={setSelectedRecipe}
+                        t={t}
+                        lang={lang}
+                      />
+                    </>
+                  )}
                   {filteredRecipes.map((recipe, idx) => (
                     <RecipeCard
                       key={`${recipe.name}-${idx}`}
