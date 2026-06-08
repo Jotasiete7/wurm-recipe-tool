@@ -38,12 +38,13 @@ create table if not exists recipe_votes (
     id uuid default gen_random_uuid() primary key,
     recipe_id uuid references recipes(id) on delete cascade,
     ip_hash text not null,
+    vote_date date default (now() at time zone 'utc')::date,
     voted_at timestamptz default now()
 );
 
 -- Index for 1 vote per day per recipe per IP
 create unique index if not exists recipe_votes_daily_unique
-    on recipe_votes (recipe_id, ip_hash, date(voted_at));
+    on recipe_votes (recipe_id, ip_hash, vote_date);
 
 -- Enable RLS on recipe_votes
 alter table recipe_votes enable row level security;
@@ -112,7 +113,7 @@ begin
         select 1 from recipe_votes 
         where recipe_id = p_recipe_id 
           and ip_hash = hashed_ip 
-          and date(voted_at) = date(now())
+          and vote_date = (now() at time zone 'utc')::date
     ) into vote_exists;
 
     if vote_exists then
