@@ -30,79 +30,141 @@ export default function RecipeSubmissionModal({ onClose, t, lang, initialFiles =
         localStorage.setItem('wurm_contributor_nick', name);
     };
 
+    const handleFilesIngested = async (files: File[]) => {
+        if (!files || files.length === 0) return;
+        setOcrLoading(true);
+        setOcrProgress(0);
+        setOcrError(null);
+        setMatchDetails(null);
+        
+        try {
+            const { createWorker } = await import('tesseract.js');
+            const parsedResults: Partial<Recipe>[] = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const worker = await createWorker('eng', 1, {
+                    logger: (m: any) => {
+                        if (m.status === 'recognizing text') {
+                            const progressPct = Math.round(((i + m.progress) / files.length) * 100);
+                            setOcrProgress(progressPct);
+                        }
+                    }
+                });
+                const { data: { text } } = await worker.recognize(file);
+                await worker.terminate();
+
+                const parsed = parseOcrText(text);
+                parsedResults.push(parsed);
+            }
+
+            let newParsed = parsedResults[0];
+            if (parsedResults.length > 1) {
+                newParsed = mergeParses(parsedResults[0], parsedResults[1]);
+            }
+
+            // Merge with existing state if already populated
+            let mergedRecipe: Recipe = {
+                name: newParsed.name || initialRecipe?.name || '',
+                skill: newParsed.skill || initialRecipe?.skill || '',
+                container: newParsed.container || initialRecipe?.container || '',
+                cooker: newParsed.cooker || initialRecipe?.cooker || '',
+                mandatory: initialRecipe?.mandatory || '',
+            };
+
+            if (newParsed.mandatory) {
+                const existingList = initialRecipe?.mandatory ? initialRecipe.mandatory.split(';').map(x => x.trim()) : [];
+                const newList = newParsed.mandatory.split(';').map(x => x.trim());
+                
+                const ingredientMap = new Map<string, string>();
+                [...existingList, ...newList].forEach(item => {
+                    const name = item.split(',')[0]?.trim();
+                    if (name) {
+                        const normalized = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        ingredientMap.set(normalized, item);
+                    }
+                });
+                
+                mergedRecipe.mandatory = Array.from(ingredientMap.values()).join('; ');
+            }
+
+            setInitialRecipe(mergedRecipe);
+
+            // Check similarity against existing database recipes
+            const { data: dbRecipes } = await supabase
+                .from('recipes')
+                .select('*')
+                .in('status', ['verified', 'legacy_verified', 'pending']);
+
+            if (dbRecipes && dbRecipes.length > 0) {
+                const bestMatch = findBestRecipeMatch(mergedRecipe, dbRecipes, 0.75);
+                if (bestMatch) {
+                    setMatchDetails({
+                        name: bestMatch.recipe.name,
+                        score: bestMatch.score
+                    });
+                }
+            }
+
+        } catch (err) {
+            console.error('OCR run error:', err);
+            setOcrError(lang === 'pt' 
+                ? 'Falha ao ler imagem. Por favor preencha manualmente.' 
+                : 'Failed to read image. Please fill in the fields manually.');
+        } finally {
+            setOcrLoading(false);
+        }
+    };
+
     // Run OCR on mount if files are provided
     useEffect(() => {
         if (initialFiles && initialFiles.length > 0) {
-            const runOcr = async () => {
-                setOcrLoading(true);
-                setOcrProgress(0);
-                setOcrError(null);
-                setMatchDetails(null);
-                
-                try {
-                    const { createWorker } = await import('tesseract.js');
-                    const parsedResults: Partial<Recipe>[] = [];
-
-                    for (let i = 0; i < initialFiles.length; i++) {
-                        const file = initialFiles[i];
-                        const worker = await createWorker('eng', 1, {
-                            logger: (m: any) => {
-                                if (m.status === 'recognizing text') {
-                                    // Calculate progress across multiple files if 2 files exist
-                                    const progressPct = Math.round(((i + m.progress) / initialFiles.length) * 100);
-                                    setOcrProgress(progressPct);
-                                }
-                            }
-                        });
-                        const { data: { text } } = await worker.recognize(file);
-                        await worker.terminate();
-
-                        const parsed = parseOcrText(text);
-                        parsedResults.push(parsed);
-                    }
-
-                    let finalParsed = parsedResults[0];
-                    if (parsedResults.length > 1) {
-                        finalParsed = mergeParses(parsedResults[0], parsedResults[1]);
-                    }
-
-                    // Check similarity against existing database recipes
-                    const { data: dbRecipes } = await supabase
-                        .from('recipes')
-                        .select('*')
-                        .in('status', ['verified', 'legacy_verified', 'pending']);
-
-                    if (dbRecipes && dbRecipes.length > 0) {
-                        const bestMatch = findBestRecipeMatch(finalParsed, dbRecipes, 0.75);
-                        if (bestMatch) {
-                            setMatchDetails({
-                                name: bestMatch.recipe.name,
-                                score: bestMatch.score
-                            });
-                        }
-                    }
-
-                    // Pre-fill the initial recipe object
-                    setInitialRecipe({
-                        name: finalParsed.name || '',
-                        skill: finalParsed.skill || '',
-                        container: finalParsed.container || '',
-                        cooker: finalParsed.cooker || '',
-                        mandatory: finalParsed.mandatory || '',
-                    });
-
-                } catch (err) {
-                    console.error('OCR run error:', err);
-                    setOcrError(lang === 'pt' 
-                        ? 'Falha ao ler imagem. Por favor preencha manualmente.' 
-                        : 'Failed to read image. Please fill in the fields manually.');
-                } finally {
-                    setOcrLoading(false);
-                }
-            };
-            runOcr();
+            handleFilesIngested(initialFiles);
         }
-    }, [initialFiles, lang]);
+    }, [initialFiles]);
+
+    // Handle global paste events when the modal is open
+    useEffect(() => {
+        const handlePaste = (e: ClipboardEvent) => {
+            if (e.clipboardData && e.clipboardData.files.length > 0) {
+                const filesArray = Array.from(e.clipboardData.files).filter(f => f.type.startsWith('image/'));
+                if (filesArray.length > 0) {
+                    handleFilesIngested(filesArray.slice(0, 2));
+                }
+            }
+        };
+
+        window.addEventListener('paste', handlePaste);
+        return () => {
+            window.removeEventListener('paste', handlePaste);
+        };
+    }, [initialRecipe]);
+
+    // Drag-and-drop state & handlers
+    const [dragActive, setDragActive] = useState(false);
+
+    const handleDrag = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") {
+            setDragActive(true);
+        } else if (e.type === "dragleave") {
+            setDragActive(false);
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const filesArray = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (filesArray.length > 0) {
+                handleFilesIngested(filesArray.slice(0, 2));
+            }
+        }
+    };
 
     const handleSubmit = async (data: {
         name: string;
@@ -179,8 +241,23 @@ export default function RecipeSubmissionModal({ onClose, t, lang, initialFiles =
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+        <div 
+            onDragEnter={handleDrag}
+            onDragOver={handleDrag}
+            onDragLeave={handleDrag}
+            onDrop={handleDrop}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200"
+        >
             <div className="relative bg-wurm-panel border border-wurm-border rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+                
+                {/* Drag Overlay */}
+                {dragActive && (
+                    <div className="absolute inset-0 bg-wurm-accent/15 border-2 border-dashed border-wurm-accent z-50 rounded-lg flex items-center justify-center pointer-events-none animate-in fade-in duration-200">
+                        <div className="bg-black/80 px-6 py-4 rounded border border-wurm-accent text-wurm-accent font-serif font-bold text-sm tracking-wider uppercase">
+                            {lang === 'pt' ? 'Solte o Print Aqui' : 'Drop Screenshot Here'}
+                        </div>
+                    </div>
+                )}
                 
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-wurm-border bg-gradient-to-r from-wurm-panel to-black">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Recipe } from '../types';
 
 interface RecipeFormData {
@@ -46,6 +46,32 @@ export function useRecipeForm(initialRecipe?: Recipe) {
         creatorName: initialRecipe?.creator_name || '',
         serverName: initialRecipe?.server_name || '',
     });
+
+    // Watch for updates of initialRecipe (e.g. after OCR finishes)
+    useEffect(() => {
+        if (initialRecipe) {
+            setFormData({
+                name: initialRecipe.name || '',
+                skill: initialRecipe.skill || '',
+                container: initialRecipe.container || '',
+                cooker: initialRecipe.cooker || '',
+                ingredients: initialRecipe.mandatory
+                    ? initialRecipe.mandatory.split(';').map(item => {
+                        const [name, qty] = item.trim().split(',').map(s => s.trim());
+                        return { name: name || '', qty: qty || '' };
+                    })
+                    : [{ name: '', qty: '' }],
+                screenshot: null,
+                hintEn: initialRecipe.hint_en || '',
+                hintPt: initialRecipe.hint_pt || '',
+                hintRu: initialRecipe.hint_ru || '',
+                isUnique: initialRecipe.is_unique || false,
+                creatorName: initialRecipe.creator_name || '',
+                serverName: initialRecipe.server_name || '',
+            });
+            setErrors({});
+        }
+    }, [initialRecipe]);
 
     const [errors, setErrors] = useState<RecipeFormErrors>({});
 
