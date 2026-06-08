@@ -112,8 +112,8 @@ begin
     if p_source is not null and p_source != '' then
         select count(*) >= 3 into is_trusted
         from recipe_proofs rp
-        inner join recipes r on r.id = rp.recipe_id
-        where rp.source = p_source and r.status in ('verified', 'legacy_verified');
+        inner join recipes rec on rec.id = rp.recipe_id
+        where rp.source = p_source and rec.status in ('verified', 'legacy_verified');
     else
         is_trusted := false;
     end if;

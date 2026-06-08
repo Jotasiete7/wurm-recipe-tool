@@ -1,138 +1,6 @@
--- SQL Migration for OCR & Voting Feature
+-- SQL Hotfix for submit_recipe_proof variable shadowing error
+-- This script fixes the 'record "r" is not assigned yet' runtime error by renaming the table alias 'recipes r' to 'recipes rec'
 
--- Enable required extensions
-create extension if not exists pgcrypto;
-create extension if not exists fuzzystrmatch;
-
--- 1. Update recipes table with new fields for unique recipes and corrections
-alter table recipes add column if not exists is_unique boolean default false;
-alter table recipes add column if not exists creator_name text default null;
-alter table recipes add column if not exists server_name text default null;
-alter table recipes add column if not exists corrected_fields jsonb default null;
-
--- 2. Create recipe_proofs table to track structural matches
-create table if not exists recipe_proofs (
-    id uuid default gen_random_uuid() primary key,
-    recipe_id uuid references recipes(id) on delete cascade,
-    parsed_name text not null,
-    parsed_skill text,
-    parsed_cooker text,
-    parsed_container text,
-    parsed_mandatory text,
-    source text,
-    ip_hash text,
-    proof_type text default 'confirmation', -- 'confirmation' or 'correction'
-    corrected_fields jsonb default null,
-    created_at timestamptz default now()
-);
-
--- Enable RLS on recipe_proofs
-alter table recipe_proofs enable row level security;
-
--- Policies for recipe_proofs
-drop policy if exists "Anyone can read proofs" on recipe_proofs;
-create policy "Anyone can read proofs" on recipe_proofs
-    for select using (true);
-
--- 3. Create recipe_votes table to track anonymous monthly thumbs up
-create table if not exists recipe_votes (
-    id uuid default gen_random_uuid() primary key,
-    recipe_id uuid references recipes(id) on delete cascade,
-    ip_hash text not null,
-    vote_date date default (now() at time zone 'utc')::date,
-    voted_at timestamptz default now()
-);
-
--- Index for 1 vote per day per recipe per IP
-create unique index if not exists recipe_votes_daily_unique
-    on recipe_votes (recipe_id, ip_hash, vote_date);
-
--- Enable RLS on recipe_votes
-alter table recipe_votes enable row level security;
-
--- Policies for recipe_votes
-drop policy if exists "Anyone can read votes" on recipe_votes;
-create policy "Anyone can read votes" on recipe_votes
-    for select using (true);
-
--- 4. Helper array functions for Jaccard similarity inside SQL
-create or replace function array_intersection(anyarray, anyarray)
-returns anyarray as $$
-    select array(
-        select unnest($1)
-        intersect
-        select unnest($2)
-    );
-$$ language sql immutable;
-
-create or replace function array_union(anyarray, anyarray)
-returns anyarray as $$
-    select array(
-        select unnest($1)
-        union
-        select unnest($2)
-    );
-$$ language sql immutable;
-
-create or replace function jaccard_similarity(anyarray, anyarray)
-returns float as $$
-declare
-    inter_len int;
-    union_len int;
-begin
-    inter_len := cardinality(array_intersection($1, $2));
-    union_len := cardinality(array_union($1, $2));
-    if union_len = 0 then
-        return 1.0;
-    end if;
-    return inter_len::float / union_len::float;
-end;
-$$ language plpgsql immutable;
-
--- 5. Helper text normalizer for Jaccard and string matches
-create or replace function normalize_wurm_text(val text)
-returns text as $$
-begin
-    return regexp_replace(lower(trim(val)), '[^a-z0-9\s]', '', 'g');
-end;
-$$ language plpgsql immutable;
-
--- 6. RPC function to handle recipe thumbs up voting with time-gate and IP dedup
-create or replace function vote_recipe(p_recipe_id uuid)
-returns jsonb
-security definer
-as $$
-declare
-    client_ip text;
-    hashed_ip text;
-    vote_exists boolean;
-begin
-    client_ip := coalesce(current_setting('request.headers', true)::json->>'x-forwarded-for', '127.0.0.1');
-    hashed_ip := encode(digest(client_ip, 'sha256'), 'hex');
-
-    -- Check if vote already exists for today
-    select exists (
-        select 1 from recipe_votes 
-        where recipe_id = p_recipe_id 
-          and ip_hash = hashed_ip 
-          and vote_date = (now() at time zone 'utc')::date
-    ) into vote_exists;
-
-    if vote_exists then
-        return jsonb_build_object('success', false, 'message', 'already_voted_today');
-    end if;
-
-    insert into recipe_votes (recipe_id, ip_hash)
-    values (p_recipe_id, hashed_ip);
-
-    return jsonb_build_object('success', true, 'message', 'vote_recorded');
-exception
-    when others then
-        return jsonb_build_object('success', false, 'message', SQLERRM);
-end;
-$$ language plpgsql;
-
--- 7. RPC function to handle OCR submissions, auto-verification, and corrections
 create or replace function submit_recipe_proof(
     p_name text,
     p_skill text,
@@ -269,7 +137,8 @@ begin
                     container = p_container,
                     mandatory = p_mandatory,
                     status = 'verified',
-                    corrected_fields = changes
+                    corrected_fields = changes,
+                    verification_level = 3 -- Correction from print upgrades verification to Level 3
                 where id = best_recipe_id;
 
                 insert into recipe_proofs (recipe_id, parsed_name, parsed_skill, parsed_cooker, parsed_container, parsed_mandatory, source, ip_hash, proof_type, corrected_fields)
@@ -280,6 +149,11 @@ begin
                 -- Just confirms existing verified data
                 insert into recipe_proofs (recipe_id, parsed_name, parsed_skill, parsed_cooker, parsed_container, parsed_mandatory, source, ip_hash, proof_type)
                 values (best_recipe_id, p_name, p_skill, p_cooker, p_container, p_mandatory, p_source, hashed_ip, 'confirmation');
+
+                -- Confirming an existing verified recipe elevates it to Level 3 (multiple proofs)
+                update recipes 
+                set verification_level = 3
+                where id = best_recipe_id;
 
                 return jsonb_build_object('success', true, 'result', 'confirmed', 'recipe_id', best_recipe_id);
             end if;
@@ -299,7 +173,8 @@ begin
                 if (original_source != p_source or p_source is null or p_source = '') and original_ip_hash != hashed_ip then
                     -- 2nd proof is valid! Promote to verified
                     update recipes 
-                    set status = 'verified'
+                    set status = 'verified',
+                        verification_level = 3 -- Promote directly to Level 3 (multi-print confirmed)
                     where id = best_recipe_id;
 
                     insert into recipe_proofs (recipe_id, parsed_name, parsed_skill, parsed_cooker, parsed_container, parsed_mandatory, source, ip_hash, proof_type)
@@ -311,6 +186,11 @@ begin
                     insert into recipe_proofs (recipe_id, parsed_name, parsed_skill, parsed_cooker, parsed_container, parsed_mandatory, source, ip_hash, proof_type)
                     values (best_recipe_id, p_name, p_skill, p_cooker, p_container, p_mandatory, p_source, hashed_ip, 'confirmation');
 
+                    -- First confirmation logs it as Level 2 (1 print confirmed)
+                    update recipes 
+                    set verification_level = 2
+                    where id = best_recipe_id;
+
                     return jsonb_build_object('success', true, 'result', 'proof_recorded', 'recipe_id', best_recipe_id);
                 end if;
             end;
@@ -320,13 +200,18 @@ begin
         -- F. Create a new recipe entry (no match found above 75%)
         declare
             target_status text := 'pending';
+            target_level int := 0;
         begin
             if is_trusted or p_is_unique then
                 target_status := 'verified';
+                target_level := 2;
+                if p_is_unique then
+                    target_level := 3; -- Unique recipes are trusted level 3
+                end if;
             end if;
 
-            insert into recipes (name, skill, cooker, container, mandatory, status, is_unique, creator_name, server_name, hint_en, hint_pt, hint_ru)
-            values (p_name, p_skill, p_cooker, p_container, p_mandatory, target_status, p_is_unique, p_creator_name, p_server_name, p_hint_en, p_hint_pt, p_hint_ru)
+            insert into recipes (name, skill, cooker, container, mandatory, status, is_unique, creator_name, server_name, hint_en, hint_pt, hint_ru, verification_level)
+            values (p_name, p_skill, p_cooker, p_container, p_mandatory, target_status, p_is_unique, p_creator_name, p_server_name, p_hint_en, p_hint_pt, p_hint_ru, target_level)
             returning id into new_recipe_id;
 
             insert into recipe_proofs (recipe_id, parsed_name, parsed_skill, parsed_cooker, parsed_container, parsed_mandatory, source, ip_hash, proof_type)
@@ -345,36 +230,3 @@ exception
         return jsonb_build_object('success', false, 'message', SQLERRM);
 end;
 $$ language plpgsql;
-
--- 8. Create top_recipes_monthly view (recreate to ensure compile safety)
-create or replace view top_recipes_monthly as
-select
-    r.id, r.name, r.skill, r.status,
-    count(v.id) as vote_count
-from recipes r
-left join recipe_votes v
-  on v.recipe_id = r.id
-  and date_trunc('month', v.voted_at) = date_trunc('month', now())
-where r.status in ('verified', 'legacy_verified')
-group by r.id, r.name, r.skill, r.status
-order by vote_count desc
-limit 10;
-
--- 9. Create contributor_stats view (recreate)
-create or replace view contributor_stats as
-select
-    rp.source,
-    count(*) as recipe_count
-from recipe_proofs rp
-inner join recipes r on r.id = rp.recipe_id
-where r.status in ('verified', 'legacy_verified')
-  and rp.source is not null and rp.source != ''
-group by rp.source
-order by recipe_count desc
-limit 20;
-
--- 10. Update RLS select policy on recipes to allow reading pending recipes
-drop policy if exists "Public read verified recipes" on recipes;
-create policy "Public read verified recipes" on recipes for
-select using (status in ('verified', 'legacy_verified', 'pending'));
-
