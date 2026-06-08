@@ -155,11 +155,37 @@ export function parseOcrText(rawText: string): Partial<Recipe> {
     }
   }
 
+  // Match skill case-insensitively against valid options
+  const SKILLS_LIST = ['Baking', 'Cooking', 'Hot food cooking', 'Butchering', 'Beverages', 'Dairy food making'];
+  const matchedSkill = SKILLS_LIST.find(s => s.toLowerCase() === skill.toLowerCase()) || '';
+
+  // Match cookers case-insensitively (e.g. forge -> Forge, oven -> Stone oven)
+  const COOKERS_LIST = ['None', 'Campfire', 'Stone oven', 'Kiln', 'Forge'];
+  const matchedCooker = cookers.map(c => {
+      const match = COOKERS_LIST.find(item => 
+          item.toLowerCase() === c.toLowerCase() || 
+          item.toLowerCase().includes(c.toLowerCase()) || 
+          c.toLowerCase().includes(item.toLowerCase())
+      );
+      return match || c;
+  }).filter(Boolean)[0] || ''; // Select first match
+
+  // Match containers case-insensitively (e.g. cauldron -> Cauldron)
+  const CONTAINERS_LIST = ['None', 'Bowl', 'Pottery bowl', 'Cauldron', 'Sauce pan', 'Frying pan', 'Baking stone', 'Stone oven', 'Open Helmet'];
+  const matchedContainer = containers.map(c => {
+      const match = CONTAINERS_LIST.find(item => 
+          item.toLowerCase() === c.toLowerCase() || 
+          item.toLowerCase().includes(c.toLowerCase()) || 
+          c.toLowerCase().includes(item.toLowerCase())
+      );
+      return match || c;
+  }).filter(Boolean)[0] || ''; // Select first match
+
   return {
     name: name,
-    skill: skill,
-    cooker: cookers.join('; '),
-    container: containers.join('; '),
+    skill: matchedSkill || skill,
+    cooker: matchedCooker,
+    container: matchedContainer,
     mandatory: ingredients.join('; '),
   };
 }

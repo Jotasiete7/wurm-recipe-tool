@@ -134,7 +134,7 @@ export function useRecipeForm(initialRecipe?: Recipe) {
 
         // Validate ingredients
         const validIngredients = formData.ingredients.filter(
-            ing => ing.name.trim() && ing.qty.trim()
+            ing => ing.name.trim()
         );
 
         if (validIngredients.length === 0) {
@@ -148,8 +148,8 @@ export function useRecipeForm(initialRecipe?: Recipe) {
     // Get mandatory string for database
     const getMandatoryString = (): string => {
         return formData.ingredients
-            .filter(ing => ing.name.trim() && ing.qty.trim())
-            .map(ing => `${ing.name.trim()}, ${ing.qty.trim()}`)
+            .filter(ing => ing.name.trim())
+            .map(ing => ing.qty.trim() ? `${ing.name.trim()}, ${ing.qty.trim()}` : ing.name.trim())
             .join('; ');
     };
 
