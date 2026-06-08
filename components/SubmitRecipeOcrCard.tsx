@@ -64,10 +64,10 @@ const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect,
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
       onDrop={handleDrop}
-      className={`group relative bg-black/20 rounded border transition-all duration-300 cursor-pointer overflow-hidden shadow-lg shadow-black/50 h-full min-h-[160px] flex flex-col items-center justify-center text-center p-6 ${
+      className={`group relative bg-wurm-panel rounded border transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg flex flex-col justify-between h-full min-h-[160px] ${
         isDragActive
-          ? 'border-wurm-accent bg-wurm-accent/10 scale-[1.02]'
-          : 'border-wurm-accent/30 hover:border-wurm-accent hover:bg-wurm-accent/5'
+          ? 'border-wurm-accent bg-wurm-accent/5 scale-[1.01]'
+          : 'border-wurm-border hover:border-wurm-accent/40'
       }`}
     >
       <input
@@ -79,29 +79,29 @@ const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect,
         title=""
       />
 
-      <div className="absolute inset-0 bg-gradient-to-br from-wurm-accent/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-
+      <div className="absolute inset-y-0 left-0 w-0.5 bg-wurm-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
       {/* Floating scanner effect on drag active */}
       {isDragActive && (
         <div className="absolute top-0 left-0 w-full h-1 bg-wurm-accent shadow-[0_0_8px_#d4b483] animate-[bounce_2s_infinite] pointer-events-none" />
       )}
 
-      <div className="relative z-10 flex flex-col items-center gap-3">
-        <div className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-300 ${
-          isDragActive 
-            ? 'bg-wurm-accent text-black scale-110 border-wurm-accent' 
-            : 'bg-wurm-accent/10 border-wurm-accent/30 text-wurm-accent group-hover:scale-110 group-hover:bg-wurm-accent group-hover:text-black'
-        }`}>
-          {isDragActive ? <ImageUp size={22} strokeWidth={1.5} /> : <Camera size={22} strokeWidth={1.5} />}
-        </div>
-
-        <div className="space-y-1">
-          <h3 className="text-sm font-bold font-serif text-wurm-accent uppercase tracking-widest">
-            {t.forms.ocrSubmitCardTitle}
-          </h3>
-          <p className="text-[10px] text-wurm-muted font-mono max-w-[200px] leading-normal">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between relative z-10">
+        <div>
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-wurm-border/50">
+            <Camera size={16} className="text-wurm-accent animate-[pulse_2s_infinite]" />
+            <h3 className="text-xs font-bold text-wurm-accent uppercase tracking-widest font-serif">
+              {t.forms.ocrSubmitCardTitle}
+            </h3>
+          </div>
+          <p className="text-[10px] text-wurm-muted font-mono leading-relaxed mt-1">
             // {t.forms.ocrSubmitCardDesc}
           </p>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2 text-xs font-mono font-bold text-wurm-accent group-hover:text-white transition-colors">
+          <ImageUp size={14} />
+          <span>[ {isDragActive ? 'DROP HERE' : 'UPLOAD / PASTE'} ]</span>
         </div>
       </div>
     </div>
