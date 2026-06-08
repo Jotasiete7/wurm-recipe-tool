@@ -366,6 +366,25 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
+            {/* Dashboard Row */}
+            {!pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <DailyChallengeCard
+                  onChallenge={handleDailyChallenge}
+                  t={t}
+                />
+                <SubmitRecipeOcrCard
+                  onFileSelect={handleOcrFileSelect}
+                  t={t}
+                />
+                <TopRecipesCard
+                  onRecipeClick={setSelectedRecipe}
+                  t={t}
+                  lang={lang}
+                />
+              </div>
+            )}
+
             {/* Loading State */}
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -374,25 +393,6 @@ const AppContent: React.FC = () => {
             ) : filteredRecipes.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Daily Challenge Card - First Item */}
-                  <DailyChallengeCard
-                    onChallenge={handleDailyChallenge}
-                    t={t}
-                  />
-
-                  {/* OCR Card */}
-                  <SubmitRecipeOcrCard
-                    onFileSelect={handleOcrFileSelect}
-                    t={t}
-                  />
-
-                  {/* Top Monthly Recipes Card */}
-                  <TopRecipesCard
-                    onRecipeClick={setSelectedRecipe}
-                    t={t}
-                    lang={lang}
-                  />
-
                   {filteredRecipes.map((recipe, idx) => (
                     <RecipeCard
                       key={`${recipe.name}-${idx}`}
