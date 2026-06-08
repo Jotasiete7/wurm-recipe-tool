@@ -30,6 +30,7 @@ create table if not exists recipe_proofs (
 alter table recipe_proofs enable row level security;
 
 -- Policies for recipe_proofs
+drop policy if exists "Anyone can read proofs" on recipe_proofs;
 create policy "Anyone can read proofs" on recipe_proofs
     for select using (true);
 
@@ -50,6 +51,7 @@ create unique index if not exists recipe_votes_daily_unique
 alter table recipe_votes enable row level security;
 
 -- Policies for recipe_votes
+drop policy if exists "Anyone can read votes" on recipe_votes;
 create policy "Anyone can read votes" on recipe_votes
     for select using (true);
 
