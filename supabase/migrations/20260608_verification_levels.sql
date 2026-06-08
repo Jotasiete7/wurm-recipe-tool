@@ -16,7 +16,7 @@ update recipes set verification_level = 0 where status = 'pending';
 do $$
 declare
     r record;
-    creator_name text;
+    v_creator_name text;
 begin
     for r in (
         select id, name from recipes 
@@ -36,19 +36,19 @@ begin
            or name ilike 'doctorangus%'
     ) loop
         -- Extract creator name from prefix (first word)
-        creator_name := initcap(split_part(r.name, ' ', 1));
+        v_creator_name := initcap(split_part(r.name, ' ', 1));
         
         -- Update recipe to unique and credit the creator
         update recipes 
         set is_unique = true,
-            creator_name = creator_name,
+            creator_name = v_creator_name,
             server_name = 'Harmony',
             verification_level = 3 -- Mark as Level 3 high trust unique
         where id = r.id;
 
         -- Insert a dummy proof in recipe_proofs so they show up in contributor_stats
         insert into recipe_proofs (recipe_id, parsed_name, source, ip_hash, proof_type)
-        values (r.id, r.name, creator_name, md5(creator_name), 'confirmation');
+        values (r.id, r.name, v_creator_name, md5(v_creator_name), 'confirmation');
     end loop;
 end;
 $$;
