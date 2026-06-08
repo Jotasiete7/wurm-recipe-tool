@@ -43,7 +43,7 @@ export function usePaginatedRecipes({
             let query = supabase
                 .from('recipes')
                 .select('*', { count: 'exact' })
-                .in('status', ['verified', 'legacy_verified'])
+                .in('status', ['verified', 'legacy_verified', 'pending'])
                 .order('name', { ascending: true });
 
             // Server-side search if search term exists
@@ -77,6 +77,10 @@ export function usePaginatedRecipes({
                     hint_en: d.hint_en || undefined,
                     hint_pt: d.hint_pt || undefined,
                     hint_ru: d.hint_ru || undefined,
+                    is_unique: d.is_unique || undefined,
+                    creator_name: d.creator_name || undefined,
+                    server_name: d.server_name || undefined,
+                    corrected_fields: d.corrected_fields || undefined,
                 }));
 
                 setRecipes(mappedRecipes);

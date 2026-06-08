@@ -30,6 +30,16 @@ interface TranslationData {
     allCookers: string;
     dailyChallenge: string;
     randomRecipe: string;
+    pendingRecipesBanner: string;
+    topChefsTitle: string;
+    topRecipesTitle: string;
+    viewFullRanking: string;
+    viewPending: string;
+    voteSuccess: string;
+    alreadyVoted: string;
+    noPendingRecipes: string;
+    uniqueRecipe: string;
+    uniqueRecipeBy: string;
   };
   forms: {
     recipeName: string;
@@ -65,6 +75,12 @@ interface TranslationData {
     saveChanges: string;
     submitRecipe: string;
     successMessage: string;
+    ocrSubmitCardTitle: string;
+    ocrSubmitCardDesc: string;
+    ocrSubmitCardSuccess: string;
+    isUniqueLabel: string;
+    creatorNameLabel: string;
+    serverNameLabel: string;
   };
   skills: Record<string, string>;
 }
@@ -99,7 +115,17 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       allContainers: "All Containers",
       allCookers: "All Cookers",
       dailyChallenge: "Daily Challenge",
-      randomRecipe: "Random Recipe"
+      randomRecipe: "Random Recipe",
+      pendingRecipesBanner: "recipes await your verification!",
+      topChefsTitle: "Guild Chefs",
+      topRecipesTitle: "Most Loved of the Month",
+      viewFullRanking: "View full ranking",
+      viewPending: "View",
+      voteSuccess: "Vote recorded! 👍",
+      alreadyVoted: "You already voted today for this recipe.",
+      noPendingRecipes: "No pending recipes at the moment.",
+      uniqueRecipe: "⭐ Unique Recipe",
+      uniqueRecipeBy: "Recipe created by {creator} on {server}"
     },
     forms: {
       recipeName: "Recipe Name *",
@@ -134,7 +160,13 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       editing: "Editing:",
       saveChanges: "Save Changes",
       submitRecipe: "Submit Recipe",
-      successMessage: "Recipe submitted successfully! It will be reviewed by admins."
+      successMessage: "Recipe submitted successfully! It will be reviewed by the community.",
+      ocrSubmitCardTitle: "Drag & drop your recipe print",
+      ocrSubmitCardDesc: "Drag your screenshot or paste (Ctrl+V) to read automatically",
+      ocrSubmitCardSuccess: "OCR read successfully! Check the fields below.",
+      isUniqueLabel: "Is this a personal / unique recipe?",
+      creatorNameLabel: "Original Creator Name",
+      serverNameLabel: "Server Name"
     },
     skills: {
       "Hot Food Cooking": "Hot Food Cooking",
@@ -175,7 +207,17 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       allContainers: "Todos Recipientes",
       allCookers: "Todos Cozinadores",
       dailyChallenge: "Desafio Diário",
-      randomRecipe: "Receita Aleatória"
+      randomRecipe: "Receita Aleatória",
+      pendingRecipesBanner: "receitas aguardam sua verificação!",
+      topChefsTitle: "Cozinheiros da Guilda",
+      topRecipesTitle: "Mais Amadas do Mês",
+      viewFullRanking: "Ver ranking completo",
+      viewPending: "Ver",
+      voteSuccess: "Voto registrado! 👍",
+      alreadyVoted: "Você já votou hoje nesta receita.",
+      noPendingRecipes: "Nenhuma receita pendente no momento.",
+      uniqueRecipe: "⭐ Receita Única",
+      uniqueRecipeBy: "Receita criada por {creator} em {server}"
     },
     forms: {
       recipeName: "Nome da Receita *",
@@ -210,7 +252,13 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       editing: "Editando:",
       saveChanges: "Salvar Alterações",
       submitRecipe: "Enviar Receita",
-      successMessage: "Receita enviada com sucesso! Será revisada pelos admins."
+      successMessage: "Receita enviada com sucesso! Será revisada pela comunidade.",
+      ocrSubmitCardTitle: "Arraste o print da sua receita",
+      ocrSubmitCardDesc: "Arraste o print ou cole (Ctrl+V) para ler automaticamente",
+      ocrSubmitCardSuccess: "Leitura OCR realizada! Verifique os campos abaixo.",
+      isUniqueLabel: "Esta receita é única / pessoal?",
+      creatorNameLabel: "Nome do Criador Original",
+      serverNameLabel: "Nome do Servidor"
     },
     skills: {
       "Hot Food Cooking": "Hot Food Cooking",
@@ -251,7 +299,17 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       allContainers: "Все контейнеры",
       allCookers: "Все плиты",
       dailyChallenge: "Ежедневное испытание",
-      randomRecipe: "Случайный рецепт"
+      randomRecipe: "Случайный рецепт",
+      pendingRecipesBanner: "рецептов ждут вашей верификации!",
+      topChefsTitle: "Повара Гильдии",
+      topRecipesTitle: "Любимые в этом месяце",
+      viewFullRanking: "Посмотреть весь рейтинг",
+      viewPending: "Посмотреть",
+      voteSuccess: "Голос учтен! 👍",
+      alreadyVoted: "Вы уже голосовали за этот рецепт сегодня.",
+      noPendingRecipes: "В данный момент нет рецептов на верификации.",
+      uniqueRecipe: "⭐ Уникальный рецепт",
+      uniqueRecipeBy: "Рецепт создан {creator} на сервере {server}"
     },
     forms: {
       recipeName: "Название рецепта *",
@@ -286,7 +344,13 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       editing: "Редактирование:",
       saveChanges: "Сохранить изменения",
       submitRecipe: "Отправить рецепт",
-      successMessage: "Рецепт успешно отправлен! Он будет проверен администраторами."
+      successMessage: "Рецепт успешно отправлен! Он будет проверен сообществом.",
+      ocrSubmitCardTitle: "Перетащите скриншот рецепта",
+      ocrSubmitCardDesc: "Перетащите файл или вставьте (Ctrl+V) для авточтения",
+      ocrSubmitCardSuccess: "Текст успешно распознан! Проверьте поля ниже.",
+      isUniqueLabel: "Это личный / уникальный рецепт?",
+      creatorNameLabel: "Имя создателя",
+      serverNameLabel: "Имя сервера"
     },
     skills: {
       "Hot Food Cooking": "Hot Food Cooking",

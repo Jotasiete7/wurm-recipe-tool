@@ -1,19 +1,108 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
-import { useAuth } from '../contexts/AuthContext';
 import RecipeForm from './RecipeForm';
-import { Language } from '../types';
+import { Language, Recipe } from '../types';
+import { parseOcrText, mergeParses } from '../utils/ocrParser';
+import { findBestRecipeMatch } from '../utils/recipeMatcher';
 
 interface RecipeSubmissionModalProps {
     onClose: () => void;
     t: any;
     lang: Language;
+    initialFiles?: File[] | null;
 }
 
-export default function RecipeSubmissionModal({ onClose, t, lang }: RecipeSubmissionModalProps) {
-    const { user } = useAuth();
-    const [submitterName, setSubmitterName] = useState('');
+export default function RecipeSubmissionModal({ onClose, t, lang, initialFiles = null }: RecipeSubmissionModalProps) {
+    const [submitterName, setSubmitterName] = useState(() => {
+        return localStorage.getItem('wurm_contributor_nick') || '';
+    });
+    
+    const [ocrLoading, setOcrLoading] = useState(false);
+    const [ocrProgress, setOcrProgress] = useState(0);
+    const [ocrError, setOcrError] = useState<string | null>(null);
+    const [initialRecipe, setInitialRecipe] = useState<Recipe | undefined>(undefined);
+    const [matchDetails, setMatchDetails] = useState<{ name: string; score: number } | null>(null);
+
+    // Persist nick changes
+    const handleNickChange = (name: string) => {
+        setSubmitterName(name);
+        localStorage.setItem('wurm_contributor_nick', name);
+    };
+
+    // Run OCR on mount if files are provided
+    useEffect(() => {
+        if (initialFiles && initialFiles.length > 0) {
+            const runOcr = async () => {
+                setOcrLoading(true);
+                setOcrProgress(0);
+                setOcrError(null);
+                setMatchDetails(null);
+                
+                try {
+                    const { createWorker } = await import('tesseract.js');
+                    const parsedResults: Partial<Recipe>[] = [];
+
+                    for (let i = 0; i < initialFiles.length; i++) {
+                        const file = initialFiles[i];
+                        const worker = await createWorker('eng', 1, {
+                            logger: (m: any) => {
+                                if (m.status === 'recognizing text') {
+                                    // Calculate progress across multiple files if 2 files exist
+                                    const progressPct = Math.round(((i + m.progress) / initialFiles.length) * 100);
+                                    setOcrProgress(progressPct);
+                                }
+                            }
+                        });
+                        const { data: { text } } = await worker.recognize(file);
+                        await worker.terminate();
+
+                        const parsed = parseOcrText(text);
+                        parsedResults.push(parsed);
+                    }
+
+                    let finalParsed = parsedResults[0];
+                    if (parsedResults.length > 1) {
+                        finalParsed = mergeParses(parsedResults[0], parsedResults[1]);
+                    }
+
+                    // Check similarity against existing database recipes
+                    const { data: dbRecipes } = await supabase
+                        .from('recipes')
+                        .select('*')
+                        .in('status', ['verified', 'legacy_verified', 'pending']);
+
+                    if (dbRecipes && dbRecipes.length > 0) {
+                        const bestMatch = findBestRecipeMatch(finalParsed, dbRecipes, 0.75);
+                        if (bestMatch) {
+                            setMatchDetails({
+                                name: bestMatch.recipe.name,
+                                score: bestMatch.score
+                            });
+                        }
+                    }
+
+                    // Pre-fill the initial recipe object
+                    setInitialRecipe({
+                        name: finalParsed.name || '',
+                        skill: finalParsed.skill || '',
+                        container: finalParsed.container || '',
+                        cooker: finalParsed.cooker || '',
+                        mandatory: finalParsed.mandatory || '',
+                    });
+
+                } catch (err) {
+                    console.error('OCR run error:', err);
+                    setOcrError(lang === 'pt' 
+                        ? 'Falha ao ler imagem. Por favor preencha manualmente.' 
+                        : 'Failed to read image. Please fill in the fields manually.');
+                } finally {
+                    setOcrLoading(false);
+                }
+            };
+            runOcr();
+        }
+    }, [initialFiles, lang]);
 
     const handleSubmit = async (data: {
         name: string;
@@ -25,61 +114,76 @@ export default function RecipeSubmissionModal({ onClose, t, lang }: RecipeSubmis
         hint_en: string;
         hint_pt: string;
         hint_ru: string;
+        is_unique: boolean;
+        creator_name: string;
+        server_name: string;
     }) => {
-        let publicUrl = null;
-
-        if (data.screenshot) {
-            // 1. Upload Screenshot
-            const fileExt = data.screenshot.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const filePath = `recipe-proofs/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('images')
-                .upload(filePath, data.screenshot);
-
-            if (uploadError) {
-                console.error('Upload error:', uploadError);
-                throw new Error('Failed to upload screenshot. Please try again.');
-            }
-
-            const {
-                data: { publicUrl: url },
-            } = supabase.storage.from('images').getPublicUrl(filePath);
-            publicUrl = url;
-        }
-
-        // 2. Insert into Database
-        const { error: insertError } = await supabase.from('recipes').insert({
-            name: data.name,
-            skill: data.skill,
-            container: data.container,
-            cooker: data.cooker,
-            mandatory: data.mandatory,
-            hint_en: data.hint_en || null,
-            hint_pt: data.hint_pt || null,
-            hint_ru: data.hint_ru || null,
-            screenshot_url: publicUrl,
-            status: 'pending',
-            submitted_by: user?.id || null,
-            source: submitterName || null,
+        // Call RPC submit_recipe_proof to handle rate limits, auto-verifications, and corrections
+        const { data: rpcData, error: rpcError } = await supabase.rpc('submit_recipe_proof', {
+            p_name: data.name,
+            p_skill: data.skill,
+            p_cooker: data.cooker,
+            p_container: data.container,
+            p_mandatory: data.mandatory,
+            p_source: submitterName || null,
+            p_is_unique: data.is_unique || false,
+            p_creator_name: data.creator_name || null,
+            p_server_name: data.server_name || null,
+            p_hint_en: data.hint_en || null,
+            p_hint_pt: data.hint_pt || null,
+            p_hint_ru: data.hint_ru || null
         });
 
-        if (insertError) {
-            console.error('Insert error:', insertError);
-            throw new Error('Failed to submit recipe. Please try again.');
+        if (rpcError) {
+            console.error('RPC Error:', rpcError);
+            throw new Error(rpcError.message || 'Failed to submit recipe.');
         }
 
-        // Success!
-        alert(t.forms.successMessage);
+        if (rpcData && !rpcData.success) {
+            if (rpcData.message === 'rate_limit_exceeded') {
+                throw new Error(lang === 'pt'
+                    ? 'Você já enviou várias receitas essa hora — obrigado pela contribuição! ⚗️ Dê uma pausa e volte em breve.'
+                    : 'You have sent several recipes this hour — thank you for the contribution! ⚗️ Take a break and return shortly.');
+            }
+            throw new Error(rpcData.message || 'Failed to submit recipe.');
+        }
+
+        // Show result-specific success alerts
+        const resultType = rpcData?.result;
+        let alertMessage = t.forms.successMessage;
+
+        if (lang === 'pt') {
+            if (resultType === 'corrected') {
+                alertMessage = `✅ Correção aplicada! Obrigado por melhorar o livro de receitas, ${submitterName || 'Cozinheiro'}!`;
+            } else if (resultType === 'auto_verified' || resultType === 'created_verified') {
+                alertMessage = `✅ Receita verificada pela comunidade! Obrigado, ${submitterName || 'Cozinheiro'}!`;
+            } else if (resultType === 'created_pending') {
+                alertMessage = `⏳ Receita enviada! Quando outra pessoa confirmar, ela entrará no livro.`;
+            } else if (resultType === 'confirmed' || resultType === 'proof_recorded') {
+                alertMessage = `👍 Prova registrada com sucesso! Obrigado pela confirmação.`;
+            }
+        } else {
+            if (resultType === 'corrected') {
+                alertMessage = `✅ Correction applied! Thank you for improving the cookbook, ${submitterName || 'Chef'}!`;
+            } else if (resultType === 'auto_verified' || resultType === 'created_verified') {
+                alertMessage = `✅ Recipe verified by the community! Thank you, ${submitterName || 'Chef'}!`;
+            } else if (resultType === 'created_pending') {
+                alertMessage = `⏳ Recipe submitted! Once another person confirms, it will be added to the book.`;
+            } else if (resultType === 'confirmed' || resultType === 'proof_recorded') {
+                alertMessage = `👍 Proof recorded successfully! Thank you for the confirmation.`;
+            }
+        }
+
+        alert(alertMessage);
         onClose();
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="bg-wurm-panel border border-wurm-border rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="relative bg-wurm-panel border border-wurm-border rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+                
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-wurm-border">
+                <div className="flex items-center justify-between p-6 border-b border-wurm-border bg-gradient-to-r from-wurm-panel to-black">
                     <div>
                         <h2 className="text-xl font-serif font-bold text-white">{t.forms.submitTitle}</h2>
                         <p className="text-xs text-wurm-muted mt-1 font-mono">
@@ -88,24 +192,68 @@ export default function RecipeSubmissionModal({ onClose, t, lang }: RecipeSubmis
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-wurm-accent/10 rounded-full transition-colors text-wurm-muted hover:text-wurm-accent"
+                        className="p-2 bg-black/30 hover:bg-wurm-accent/20 rounded-full transition-colors text-wurm-muted hover:text-wurm-accent"
                     >
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Form Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 relative">
+                    
+                    {/* Match Warning */}
+                    {matchDetails && (
+                        <div className="bg-wurm-accent/5 border border-wurm-accent/20 rounded-lg p-4 mb-6 flex items-start gap-3 animate-in fade-in duration-200">
+                            <AlertTriangle size={18} className="text-wurm-accent flex-shrink-0 mt-0.5" />
+                            <div>
+                                <h4 className="text-xs font-bold text-wurm-accent uppercase tracking-wider mb-1">
+                                    {lang === 'pt' ? 'Receita Semelhante Detectada' : 'Similar Recipe Detected'}
+                                </h4>
+                                <p className="text-xs text-wurm-text leading-relaxed font-mono">
+                                    {lang === 'pt' 
+                                        ? `Encontramos "${matchDetails.name}" (${(matchDetails.score * 100).toFixed(0)}% de similaridade). Se houver diferenças em ingredientes ou panelas, enviar esse formulário criará uma CORREÇÃO imediata.` 
+                                        : `We found "${matchDetails.name}" (${(matchDetails.score * 100).toFixed(0)}% similarity). If there are differences in ingredients or cookers, submitting this form will apply a CORRECTION immediately.`}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* OCR Error Notification */}
+                    {ocrError && (
+                        <div className="bg-amber-500/10 border border-amber-500/25 rounded p-3 mb-6 flex items-start gap-2 animate-in fade-in duration-200">
+                            <AlertTriangle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-amber-300">{ocrError}</p>
+                        </div>
+                    )}
+
                     <RecipeForm
+                        initialRecipe={initialRecipe}
                         onSubmit={handleSubmit}
                         submitLabel={t.forms.submitRecipe}
-                        requireScreenshot={true}
+                        requireScreenshot={false} // Hidden because OCR ingested the file already
                         showSubmitterName={true}
                         submitterName={submitterName}
-                        onSubmitterNameChange={setSubmitterName}
+                        onSubmitterNameChange={handleNickChange}
                         t={t}
                         lang={lang}
                     />
+
+                    {/* OCR Loading Overlay */}
+                    {ocrLoading && (
+                        <div className="absolute inset-0 bg-black/85 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
+                            <Loader2 className="w-12 h-12 text-wurm-accent animate-spin mb-4" />
+                            <div className="text-lg font-serif font-bold text-white mb-2">
+                                {lang === 'pt' ? 'Escaneando Print do Wurm...' : 'Scanning Wurm Screenshot...'}
+                            </div>
+                            <div className="w-64 bg-wurm-border rounded-full h-2 mb-2 overflow-hidden relative border border-white/5">
+                                <div 
+                                    className="bg-wurm-accent h-full transition-all duration-300 shadow-[0_0_8px_#d4b483]"
+                                    style={{ width: `${ocrProgress}%` }}
+                                />
+                            </div>
+                            <div className="text-[10px] text-wurm-muted font-mono">{ocrProgress}% {lang === 'pt' ? 'completo' : 'complete'}</div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

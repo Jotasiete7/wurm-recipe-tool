@@ -17,6 +17,8 @@ import { getUniqueValues } from './utils/dataUtils';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
+import SubmitRecipeOcrCard from './components/SubmitRecipeOcrCard';
+import TopRecipesCard from './components/TopRecipesCard';
 import { Search, RotateCcw, User, LogOut, Plus } from 'lucide-react';
 
 import ResetPasswordModal from './components/ResetPasswordModal';
@@ -29,6 +31,15 @@ const AppContent: React.FC = () => {
 
   const { user, signOut, isAdmin, recoveryMode } = useAuth();
 
+  const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
+  const [pendingOnly, setPendingOnly] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  interface Contributor {
+    source: string;
+    recipe_count: number;
+  }
+  const [contributors, setContributors] = useState<Contributor[]>([]);
 
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -74,6 +85,33 @@ const AppContent: React.FC = () => {
     fetchAllNames();
   }, []);
 
+  // Fetch pending count and contributors on mount/refresh
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      const { count, error } = await supabase
+        .from('recipes')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count !== null) {
+        setPendingCount(count);
+      }
+    };
+    fetchPendingCount();
+  }, [recipes]);
+
+  useEffect(() => {
+    const fetchContributors = async () => {
+      const { data, error } = await supabase
+        .from('contributor_stats')
+        .select('*')
+        .limit(10);
+      if (!error && data) {
+        setContributors(data as Contributor[]);
+      }
+    };
+    fetchContributors();
+  }, [recipes]);
+
   const handleIngredientClick = async (recipeName: string) => {
     try {
       const { data } = await supabase
@@ -115,13 +153,14 @@ const AppContent: React.FC = () => {
   // Search is handled server-side in usePaginatedRecipes
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
+      const matchPending = !pendingOnly || r.status === 'pending';
       const matchSkill = !filters.skill || r.skill === filters.skill;
       const matchContainer = !filters.container || (r.container && r.container.includes(filters.container));
       const matchCooker = !filters.cooker || (r.cooker && r.cooker.includes(filters.cooker));
 
-      return matchSkill && matchContainer && matchCooker;
+      return matchPending && matchSkill && matchContainer && matchCooker;
     });
-  }, [recipes, filters.skill, filters.container, filters.cooker]);
+  }, [recipes, pendingOnly, filters.skill, filters.container, filters.cooker]);
 
   // --- Handlers ---
   const handleFilterChange = (key: keyof FilterState, value: string) => {
@@ -130,6 +169,7 @@ const AppContent: React.FC = () => {
 
   const resetFilters = () => {
     setFilters({ search: '', skill: '', container: '', cooker: '' });
+    setPendingOnly(false);
   };
 
   const handleDailyChallenge = async () => {
@@ -141,6 +181,11 @@ const AppContent: React.FC = () => {
 
     // Reuse the existing ingredient click handler logic since it fetches by name
     await handleIngredientClick(randomName);
+  };
+
+  const handleOcrFileSelect = (files: File[]) => {
+    setSelectedFiles(files);
+    setShowSubmitModal(true);
   };
 
   return (
@@ -166,16 +211,14 @@ const AppContent: React.FC = () => {
         }}
         extraModules={
           <>
-            {user && (
-              <button
-                onClick={() => setShowSubmitModal(true)}
-                className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted border-r border-wurm-border/50 pr-3"
-                title="Submit New Recipe"
-              >
-                <Plus size={14} />
-                <span className="hidden sm:inline">Add Recipe</span>
-              </button>
-            )}
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted border-r border-wurm-border/50 pr-3"
+              title="Submit New Recipe"
+            >
+              <Plus size={14} />
+              <span className="hidden sm:inline">Add Recipe</span>
+            </button>
             <LanguageSwitch 
               lang={lang} 
               onLanguageChange={(l) => setLang(l as Language)} 
@@ -204,6 +247,26 @@ const AppContent: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Pending Recipes Banner */}
+        {pendingCount > 0 && (
+          <div className="bg-amber-950/20 border border-amber-500/30 rounded p-4 mb-6 flex items-center justify-between animate-pulse">
+            <div className="flex items-center gap-2 text-amber-500 text-xs font-mono font-bold uppercase tracking-wider">
+              <span>⏳</span>
+              <span>{pendingCount} {t.ui.pendingRecipesBanner}</span>
+            </div>
+            <button
+              onClick={() => setPendingOnly(prev => !prev)}
+              className={`px-4 py-1.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border transition-all ${
+                pendingOnly
+                  ? 'bg-amber-500 text-black border-amber-500 hover:bg-amber-600'
+                  : 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500 hover:text-black'
+              }`}
+            >
+              {pendingOnly ? (lang === 'pt' ? 'Ver Todas' : 'Show All') : t.ui.viewPending}
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
@@ -317,6 +380,19 @@ const AppContent: React.FC = () => {
                     t={t}
                   />
 
+                  {/* OCR Card */}
+                  <SubmitRecipeOcrCard
+                    onFileSelect={handleOcrFileSelect}
+                    t={t}
+                  />
+
+                  {/* Top Monthly Recipes Card */}
+                  <TopRecipesCard
+                    onRecipeClick={setSelectedRecipe}
+                    t={t}
+                    lang={lang}
+                  />
+
                   {filteredRecipes.map((recipe, idx) => (
                     <RecipeCard
                       key={`${recipe.name}-${idx}`}
@@ -358,6 +434,29 @@ const AppContent: React.FC = () => {
 
       <footer className="border-t border-wurm-border bg-wurm-panel py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
+          {/* Top Chefs */}
+          {contributors.length > 0 && (
+            <div className="mb-6 flex flex-col items-center">
+              <h4 className="text-[10px] font-bold text-wurm-accent uppercase tracking-widest font-mono mb-3 animate-[pulse_3s_infinite]">
+                🧑‍🍳 {t.ui.topChefsTitle}
+              </h4>
+              <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
+                {contributors.map((chef, idx) => (
+                  <span
+                    key={`${chef.source}-${idx}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/40 border border-wurm-border/60 hover:border-wurm-accent/40 text-[10px] text-wurm-text font-mono transition-all duration-300"
+                    title={`${chef.recipe_count} recipes verified`}
+                  >
+                    <span className="text-wurm-muted font-bold">#{idx + 1}</span>
+                    <span className="text-white font-medium">{chef.source}</span>
+                    <span className="w-1 h-1 rounded-full bg-wurm-muted/50" />
+                    <span className="text-wurm-accent font-bold">{chef.recipe_count}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <p className="text-wurm-muted text-[10px] font-mono uppercase tracking-widest">
             © {new Date().getFullYear()} A Guilda. Data based on Wurm Online.
           </p>
@@ -388,9 +487,14 @@ const AppContent: React.FC = () => {
 
       {showSubmitModal && (
         <RecipeSubmissionModal
-          onClose={() => setShowSubmitModal(false)}
+          onClose={() => {
+            setShowSubmitModal(false);
+            setSelectedFiles(null);
+            refresh();
+          }}
           t={t}
           lang={lang}
+          initialFiles={selectedFiles}
         />
       )}
 

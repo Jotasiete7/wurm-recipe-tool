@@ -20,6 +20,34 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
       onClick={() => onClick(recipe)}
       className="group relative bg-wurm-panel rounded border border-wurm-border hover:border-wurm-accent/40 transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg"
     >
+      {/* Status Badges */}
+      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 z-10">
+        {recipe.status === 'pending' && (
+          <span 
+            className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-amber-500/30 text-[10px] text-amber-500 shadow-md shadow-black font-mono font-bold"
+            title="Pending verification"
+          >
+            ⏳
+          </span>
+        )}
+        {(recipe.status === 'verified' || recipe.status === 'legacy_verified') && (
+          <span 
+            className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-wurm-success/30 text-[10px] text-wurm-success shadow-md shadow-black font-mono font-bold"
+            title="Verified by community"
+          >
+            ✓
+          </span>
+        )}
+        {recipe.is_unique && (
+          <span 
+            className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-yellow-500/30 text-[10px] text-yellow-500 shadow-md shadow-black font-mono font-bold"
+            title="Unique / Personal Recipe"
+          >
+            ⭐
+          </span>
+        )}
+      </div>
+
       <div className="absolute inset-y-0 left-0 w-0.5 bg-wurm-accent opacity-0 group-hover:opacity-100 transition-opacity" />
       
       <div className="p-4 sm:p-5">

@@ -17,6 +17,9 @@ interface RecipeFormProps {
         hint_en: string;
         hint_pt: string;
         hint_ru: string;
+        is_unique: boolean;
+        creator_name: string;
+        server_name: string;
     }) => Promise<void>;
     submitLabel: string;
     requireScreenshot?: boolean;
@@ -76,6 +79,9 @@ export default function RecipeForm({
                 hint_en: formData.hintEn || '',
                 hint_pt: formData.hintPt || '',
                 hint_ru: formData.hintRu || '',
+                is_unique: formData.isUnique,
+                creator_name: formData.creatorName,
+                server_name: formData.serverName,
             });
         } catch (err) {
             setSubmitError(err instanceof Error ? err.message : 'An error occurred');
@@ -171,6 +177,51 @@ export default function RecipeForm({
                     ))}
                 </select>
                 {errors.cooker && <p className="text-xs text-red-400 mt-1">{errors.cooker}</p>}
+            </div>
+
+            {/* Unique Recipe Toggle & Inputs */}
+            <div className="bg-wurm-panel/50 border border-wurm-border rounded p-4 space-y-4">
+                <div className="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="isUnique"
+                        checked={formData.isUnique}
+                        onChange={(e) => updateField('isUnique', e.target.checked)}
+                        className="w-4 h-4 rounded bg-black border-wurm-border text-wurm-accent focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                    />
+                    <label htmlFor="isUnique" className="text-xs font-bold text-wurm-text uppercase tracking-wider cursor-pointer select-none">
+                        {t.forms.isUniqueLabel}
+                    </label>
+                </div>
+
+                {formData.isUnique && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-wurm-border/50 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <div>
+                            <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
+                                {t.forms.creatorNameLabel}
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.creatorName}
+                                onChange={(e) => updateField('creatorName', e.target.value)}
+                                placeholder="e.g. CozinheiroWurm"
+                                className="w-full px-4 py-2.5 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-wurm-muted uppercase tracking-wider mb-2">
+                                {t.forms.serverNameLabel}
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.serverName}
+                                onChange={(e) => updateField('serverName', e.target.value)}
+                                placeholder="e.g. Xanadu"
+                                className="w-full px-4 py-2.5 rounded bg-black/50 border border-wurm-border text-sm text-wurm-text focus:border-wurm-accent focus:outline-none transition-all"
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Ingredients */}

@@ -15,6 +15,10 @@ export interface Recipe {
   hint_en?: string;
   hint_pt?: string;
   hint_ru?: string;
+  is_unique?: boolean;
+  creator_name?: string;
+  server_name?: string;
+  corrected_fields?: any;
 }
 
 export interface FilterState {

@@ -11,6 +11,9 @@ interface RecipeFormData {
     hintEn: string;
     hintPt: string;
     hintRu: string;
+    isUnique: boolean;
+    creatorName: string;
+    serverName: string;
 }
 
 interface RecipeFormErrors {
@@ -39,6 +42,9 @@ export function useRecipeForm(initialRecipe?: Recipe) {
         hintEn: initialRecipe?.hint_en || '',
         hintPt: initialRecipe?.hint_pt || '',
         hintRu: initialRecipe?.hint_ru || '',
+        isUnique: initialRecipe?.is_unique || false,
+        creatorName: initialRecipe?.creator_name || '',
+        serverName: initialRecipe?.server_name || '',
     });
 
     const [errors, setErrors] = useState<RecipeFormErrors>({});
@@ -138,6 +144,9 @@ export function useRecipeForm(initialRecipe?: Recipe) {
             hintEn: initialRecipe?.hint_en || '',
             hintPt: initialRecipe?.hint_pt || '',
             hintRu: initialRecipe?.hint_ru || '',
+            isUnique: initialRecipe?.is_unique || false,
+            creatorName: initialRecipe?.creator_name || '',
+            serverName: initialRecipe?.server_name || '',
         });
         setErrors({});
     };

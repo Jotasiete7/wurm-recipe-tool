@@ -5,6 +5,7 @@ import { translateSkill } from '../utils/translations';
 import { X, ChefHat, Box, Flame, Utensils, Edit3 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import RecipeEditModal from './RecipeEditModal';
+import { supabase } from '../supabaseClient';
 
 interface RecipeModalProps {
   recipe: Recipe | null;
@@ -27,6 +28,89 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 }) => {
   const { isAdmin } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
+
+  const [timeLeft, setTimeLeft] = useState(5);
+  const [voteCount, setVoteCount] = useState(0);
+  const [votedToday, setVotedToday] = useState(false);
+  const [voting, setVoting] = useState(false);
+
+  // Load vote state and run time gate
+  useEffect(() => {
+    if (!recipe || !recipe.id) return;
+
+    // Check if voted today in localStorage
+    const votedList = JSON.parse(localStorage.getItem('wurm_voted_recipes') || '{}');
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (votedList[recipe.id] === todayStr) {
+      setVotedToday(true);
+    } else {
+      setVotedToday(false);
+    }
+
+    // Fetch monthly vote count
+    const fetchVotes = async () => {
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+      const { count, error } = await supabase
+        .from('recipe_votes')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipe_id', recipe.id)
+        .gte('voted_at', startOfMonth);
+      
+      if (!error && count !== null) {
+        setVoteCount(count);
+      }
+    };
+    fetchVotes();
+
+    // Start time gate countdown
+    setTimeLeft(5);
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [recipe]);
+
+  const handleVote = async () => {
+    if (timeLeft > 0 || votedToday || !recipe || !recipe.id || voting) return;
+    setVoting(true);
+
+    try {
+      const { data, error } = await supabase.rpc('vote_recipe', { p_recipe_id: recipe.id });
+      if (error) throw error;
+
+      if (data && !data.success) {
+        if (data.message === 'already_voted_today') {
+          alert(t.ui.alreadyVoted);
+          setVotedToday(true);
+        } else {
+          alert(data.message);
+        }
+        return;
+      }
+
+      setVoteCount(prev => prev + 1);
+      setVotedToday(true);
+
+      const votedList = JSON.parse(localStorage.getItem('wurm_voted_recipes') || '{}');
+      votedList[recipe.id] = new Date().toISOString().split('T')[0];
+      localStorage.setItem('wurm_voted_recipes', JSON.stringify(votedList));
+
+      alert(t.ui.voteSuccess);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to cast vote.');
+    } finally {
+      setVoting(false);
+    }
+  };
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (recipe) {
@@ -91,6 +175,23 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 bg-wurm-bg/50">
+
+          {/* Unique Recipe Credits */}
+          {recipe.is_unique && (
+            <div className="bg-yellow-950/20 border border-yellow-500/30 rounded p-4 flex items-center gap-3 animate-in fade-in duration-200">
+              <span className="text-xl">⭐</span>
+              <div>
+                <h4 className="text-xs font-bold text-yellow-500 uppercase tracking-wider mb-0.5">
+                  {t.ui.uniqueRecipe}
+                </h4>
+                <p className="text-sm text-wurm-text font-mono">
+                  {t.ui.uniqueRecipeBy
+                    .replace('{creator}', recipe.creator_name || 'Anonymous')
+                    .replace('{server}', recipe.server_name || 'Unknown')}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Main Attributes Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -183,6 +284,38 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
             </div>
           )}
         </div>
+
+        {/* Footer with Thumbs Up */}
+        {recipe.id && (recipe.status === 'verified' || recipe.status === 'legacy_verified') && (
+          <div className="border-t border-wurm-border bg-black/40 px-6 py-4 flex items-center justify-between">
+            <span className="text-[10px] text-wurm-muted font-mono uppercase tracking-wider">
+              {votedToday 
+                ? t.ui.alreadyVoted 
+                : (timeLeft > 0 
+                  ? `${lang === 'pt' ? 'Mantenha aberto por' : 'Keep open for'} ${timeLeft}s` 
+                  : (lang === 'pt' ? 'Vote nesta receita' : 'Vote for this recipe'))}
+            </span>
+            <button
+              onClick={handleVote}
+              disabled={timeLeft > 0 || voting}
+              className={`flex items-center gap-2 px-4 py-2 rounded text-xs font-bold font-mono uppercase tracking-widest border transition-all duration-300 relative overflow-hidden ${
+                votedToday
+                  ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500 cursor-not-allowed'
+                  : (timeLeft > 0
+                    ? 'bg-black/20 border-wurm-border text-wurm-muted cursor-not-allowed'
+                    : 'bg-wurm-accent/10 border-wurm-accent text-wurm-accent hover:bg-wurm-accent hover:text-black hover:shadow-[0_0_10px_#d4b483]')
+              }`}
+            >
+              {timeLeft > 0 && (
+                <div 
+                  className="absolute inset-0 bg-wurm-accent/10 transition-all duration-1000 origin-left"
+                  style={{ width: `${(5 - timeLeft) * 20}%` }}
+                />
+              )}
+              <span className="relative z-10">👍 {voteCount}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}
