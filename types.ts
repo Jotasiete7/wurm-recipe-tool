@@ -19,6 +19,7 @@ export interface Recipe {
   creator_name?: string;
   server_name?: string;
   corrected_fields?: any;
+  verification_level?: number;
 }
 
 export interface FilterState {

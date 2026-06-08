@@ -169,16 +169,32 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                   </span>
                 )}
                 {recipe.status === 'pending' && (
-                  <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs font-mono font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs font-mono font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
                     <span>⏳</span>
                     <span>{lang === 'pt' ? 'Pendente' : (lang === 'ru' ? 'В ожидании' : 'Pending')}</span>
                   </span>
                 )}
-                {(recipe.status === 'verified' || recipe.status === 'legacy_verified') && (
-                  <span className="px-3 py-1 bg-wurm-success/10 border border-wurm-success/30 rounded text-xs font-mono font-bold text-wurm-success uppercase tracking-wider flex items-center gap-1.5">
-                    <span>✓</span>
-                    <span>{lang === 'pt' ? 'Verificada' : (lang === 'ru' ? 'Проверено' : 'Verified')}</span>
-                  </span>
+                {recipe.status !== 'pending' && (
+                  <>
+                    {(recipe.verification_level === 1 || (!recipe.verification_level && recipe.status === 'legacy_verified')) && (
+                      <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded text-xs font-mono font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📜</span>
+                        <span>{lang === 'pt' ? 'Legada (Nível 1)' : (lang === 'ru' ? 'Архивный (Ур. 1)' : 'Legacy (Level 1)')}</span>
+                      </span>
+                    )}
+                    {(recipe.verification_level === 2 || (!recipe.verification_level && recipe.status === 'verified' && !recipe.is_unique)) && (
+                      <span className="px-3 py-1 bg-wurm-success/10 border border-wurm-success/30 rounded text-xs font-mono font-bold text-wurm-success uppercase tracking-wider flex items-center gap-1.5">
+                        <span>✓</span>
+                        <span>{lang === 'pt' ? 'Confirmada (Nível 2)' : (lang === 'ru' ? 'Подтверждено (Ур. 2)' : 'Confirmed (Level 2)')}</span>
+                      </span>
+                    )}
+                    {(recipe.verification_level === 3 || recipe.is_unique) && (
+                      <span className="px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs font-mono font-bold text-yellow-500 uppercase tracking-wider flex items-center gap-1.5 animate-[pulse_3s_infinite]">
+                        <span>⭐</span>
+                        <span>{lang === 'pt' ? 'Alta Confiança (Nível 3)' : (lang === 'ru' ? 'Высокое доверие (Ур. 3)' : 'Trusted (Level 3)')}</span>
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </div>

@@ -30,21 +30,33 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
             ⏳
           </span>
         )}
-        {(recipe.status === 'verified' || recipe.status === 'legacy_verified') && (
-          <span 
-            className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-wurm-success/30 text-[10px] text-wurm-success shadow-md shadow-black font-mono font-bold"
-            title="Verified by community"
-          >
-            ✓
-          </span>
-        )}
-        {recipe.is_unique && (
-          <span 
-            className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-yellow-500/30 text-[10px] text-yellow-500 shadow-md shadow-black font-mono font-bold"
-            title="Unique / Personal Recipe"
-          >
-            ⭐
-          </span>
+        {recipe.status !== 'pending' && (
+          <>
+            {(recipe.verification_level === 1 || (!recipe.verification_level && recipe.status === 'legacy_verified')) && (
+              <span 
+                className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-blue-500/30 text-[10px] text-blue-400 shadow-md shadow-black font-mono font-bold"
+                title="Legacy Verified (Level 1)"
+              >
+                📜
+              </span>
+            )}
+            {(recipe.verification_level === 2 || (!recipe.verification_level && recipe.status === 'verified' && !recipe.is_unique)) && (
+              <span 
+                className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-wurm-success/30 text-[10px] text-wurm-success shadow-md shadow-black font-mono font-bold"
+                title="Screenshot Verified (Level 2)"
+              >
+                ✓
+              </span>
+            )}
+            {(recipe.verification_level === 3 || recipe.is_unique) && (
+              <span 
+                className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-yellow-500/30 text-[10px] text-yellow-500 shadow-md shadow-black font-mono font-bold animate-[pulse_2s_infinite]"
+                title="Highly Verified / Trusted (Level 3)"
+              >
+                ⭐
+              </span>
+            )}
+          </>
         )}
       </div>
 
