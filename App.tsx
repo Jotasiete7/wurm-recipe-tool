@@ -51,7 +51,13 @@ const AppContent: React.FC = () => {
 
   const [allRecipeNames, setAllRecipeNames] = useState<Set<string>>(new Set());
 
-  const [lang, setLang] = useState<Language>('en');
+  const [lang, setLang] = useState<Language>(() => {
+    const saved = localStorage.getItem('wurm_language');
+    if (saved === 'en' || saved === 'pt' || saved === 'ru') {
+      return saved as Language;
+    }
+    return 'en';
+  });
   const t = TRANSLATIONS[lang];
 
   // --- Paginated Recipes ---
@@ -222,7 +228,11 @@ const AppContent: React.FC = () => {
             </button>
             <LanguageSwitch 
               lang={lang} 
-              onLanguageChange={(l) => setLang(l as Language)} 
+              onLanguageChange={(l) => {
+                const newLang = l as Language;
+                setLang(newLang);
+                localStorage.setItem('wurm_language', newLang);
+              }} 
               languages={[
                 { code: 'en', label: 'EN' },
                 { code: 'pt', label: 'PT' },
