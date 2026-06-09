@@ -21,6 +21,8 @@ import DailyChallengeCard from './components/DailyChallengeCard';
 import SubmitRecipeOcrCard from './components/SubmitRecipeOcrCard';
 import TopRecipesCard from './components/TopRecipesCard';
 import PendingInfoCard from './components/PendingInfoCard';
+import StatsPage from './components/StatsPage';
+import { useSearchLogger } from './hooks/useSearchLogger';
 import { Search, RotateCcw, User, LogOut, Plus } from 'lucide-react';
 
 import ResetPasswordModal from './components/ResetPasswordModal';
@@ -33,6 +35,8 @@ const AppContent: React.FC = () => {
   const handleOpenRecipe = (recipe: Recipe) => setRecipeHistory([recipe]);
   const handleCloseRecipe = () => setRecipeHistory([]);
   const handleBackRecipe = () => setRecipeHistory(prev => prev.slice(0, -1));
+
+  const [currentPage, setCurrentPage] = useState<'home' | 'stats'>('home');
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -176,6 +180,17 @@ const AppContent: React.FC = () => {
     });
   }, [recipes, filters.skill, filters.container, filters.cooker]);
 
+  // --- Search Analytics Logging ---
+  // Passive hook — logs searches to Supabase with 800ms debounce.
+  // Never blocks or throws. Captures both found and zero-result searches.
+  useSearchLogger(
+    filters.search,
+    filteredRecipes.length,
+    lang,
+    filteredRecipes[0]?.id,
+    filteredRecipes[0]?.name
+  );
+
   // --- Handlers ---
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -201,6 +216,86 @@ const AppContent: React.FC = () => {
     setSelectedFiles(files);
     setShowSubmitModal(true);
   };
+
+  // Stats page — render in place of main content (no router needed)
+  if (currentPage === 'stats') {
+    return (
+      <div className="min-h-screen flex flex-col bg-wurm-bg text-wurm-text selection:bg-wurm-accent selection:text-black">
+        <AgHeader
+          currentToolId="recipes"
+          brandSubName={t.ui.recipes}
+          lang={lang as 'en' | 'pt'}
+          auth={{
+            user: user ? { name: user.email?.split('@')[0], image: undefined } : null,
+            isAdmin,
+            loginButton: (
+              <button onClick={() => setShowLoginModal(true)} className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted">
+                <User size={14} />
+                <span className="hidden sm:inline">LOGIN</span>
+              </button>
+            ),
+            logoutForm: (
+              <button onClick={() => signOut()} className="p-1 hover:text-red-400 transition-colors text-wurm-muted" title="Sair">
+                <LogOut size={14} />
+              </button>
+            )
+          }}
+          extraModules={
+            <>
+              <button
+                onClick={() => setShowSubmitModal(true)}
+                className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted border-r border-wurm-border/50 pr-3"
+                title="Submit New Recipe"
+              >
+                <Plus size={14} />
+                <span className="hidden sm:inline">Add Recipe</span>
+              </button>
+              <LanguageSwitch
+                lang={lang}
+                onLanguageChange={(l) => {
+                  const newLang = l as Language;
+                  setLang(newLang);
+                  localStorage.setItem('wurm_language', newLang);
+                }}
+                languages={[
+                  { code: 'en', label: 'EN' },
+                  { code: 'pt', label: 'PT' },
+                  { code: 'ru', label: 'RU' }
+                ]}
+                styles={agStyles}
+              />
+            </>
+          }
+        />
+        <StatsPage
+          onBack={() => setCurrentPage('home')}
+          lang={lang}
+          t={t}
+          onRecipeClick={handleOpenRecipe}
+        />
+        <RecipeModal
+          recipe={activeRecipe}
+          onClose={handleCloseRecipe}
+          onBack={recipeHistory.length > 1 ? handleBackRecipe : undefined}
+          onRefresh={refresh}
+          lang={lang}
+          t={t}
+          allRecipeNames={allRecipeNames}
+          onIngredientClick={handleIngredientClick}
+        />
+        {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
+        {showSubmitModal && (
+          <RecipeSubmissionModal
+            onClose={() => { setShowSubmitModal(false); setSelectedFiles(null); refresh(); }}
+            t={t}
+            lang={lang}
+            initialFiles={selectedFiles}
+          />
+        )}
+        {recoveryMode && <ResetPasswordModal />}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-wurm-bg text-wurm-text selection:bg-wurm-accent selection:text-black">
@@ -397,11 +492,11 @@ const AppContent: React.FC = () => {
                       onFileSelect={handleOcrFileSelect}
                       t={t}
                     />
-                    <TopRecipesCard
-                      onRecipeClick={handleOpenRecipe}
-                      t={t}
-                      lang={lang}
-                    />
+                      <TopRecipesCard
+                        onNavigate={() => setCurrentPage('stats')}
+                        t={t}
+                        lang={lang}
+                      />
                   </>
                 )}
                 {pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
@@ -429,7 +524,7 @@ const AppContent: React.FC = () => {
                         t={t}
                       />
                       <TopRecipesCard
-                        onRecipeClick={handleOpenRecipe}
+                        onNavigate={() => setCurrentPage('stats')}
                         t={t}
                         lang={lang}
                       />

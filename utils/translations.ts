@@ -42,6 +42,27 @@ interface TranslationData {
     uniqueRecipe: string;
     uniqueRecipeBy: string;
     back: string;
+    statsLinkLabel: string;
+    statsLinkSub: string;
+    statsExplore: string;
+    statsTitle: string;
+    statsSubtitle: string;
+    statsPeriod7: string;
+    statsPeriod30: string;
+    statsPeriodAll: string;
+    topSearchedTitle: string;
+    topVotedTitle: string;
+    ingredientDemandTitle: string;
+    ingredientDemandSub: string;
+    topContributorsTitle: string;
+    zeroResultsTitle: string;
+    zeroResultsSub: string;
+    statsSearchCount: string;
+    statsVoteCount: string;
+    statsDemandScore: string;
+    statsRecipesCount: string;
+    statsNoData: string;
+    statsBackToDashboard: string;
   };
   forms: {
     recipeName: string;
@@ -129,7 +150,28 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       noPendingRecipes: "No pending recipes at the moment.",
       uniqueRecipe: "⭐ Unique Recipe",
       uniqueRecipeBy: "Recipe created by {creator} on {server}",
-      back: "Back"
+      back: "Back",
+      statsLinkLabel: "Statistics & Rankings",
+      statsLinkSub: "Recipes · Ingredients · Market",
+      statsExplore: "Explore",
+      statsTitle: "Statistics & Rankings",
+      statsSubtitle: "// Community data · Market intelligence for Wurm Online",
+      statsPeriod7: "7 Days",
+      statsPeriod30: "30 Days",
+      statsPeriodAll: "All Time",
+      topSearchedTitle: "🔥 Most Searched Recipes",
+      topVotedTitle: "❤️ Most Voted Recipes",
+      ingredientDemandTitle: "📦 Ingredients in Market Demand",
+      ingredientDemandSub: "// Derived from most searched recipes · Useful to decide what to farm and sell",
+      topContributorsTitle: "👨‍🍳 Top Contributors",
+      zeroResultsTitle: "📉 Searches With No Results",
+      zeroResultsSub: "// What players look for but doesn't exist yet — contribute these recipes!",
+      statsSearchCount: "searches",
+      statsVoteCount: "votes",
+      statsDemandScore: "demand pts",
+      statsRecipesCount: "recipes",
+      statsNoData: "No data yet. Play and search for recipes to generate statistics!",
+      statsBackToDashboard: "Back to Dashboard"
     },
     forms: {
       recipeName: "Recipe Name *",
@@ -223,7 +265,28 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       noPendingRecipes: "Nenhuma receita pendente no momento.",
       uniqueRecipe: "⭐ Receita Única",
       uniqueRecipeBy: "Receita criada por {creator} em {server}",
-      back: "Voltar"
+      back: "Voltar",
+      statsLinkLabel: "Estatísticas & Rankings",
+      statsLinkSub: "Receitas · Ingredientes · Mercado",
+      statsExplore: "Explorar",
+      statsTitle: "Estatísticas & Rankings",
+      statsSubtitle: "// Dados da comunidade · Inteligência de mercado para Wurm Online",
+      statsPeriod7: "7 Dias",
+      statsPeriod30: "30 Dias",
+      statsPeriodAll: "Todos os Tempos",
+      topSearchedTitle: "🔥 Receitas Mais Buscadas",
+      topVotedTitle: "❤️ Receitas Mais Votadas",
+      ingredientDemandTitle: "📦 Ingredientes em Alta no Mercado",
+      ingredientDemandSub: "// Derivado das receitas mais buscadas · Útil para decidir o que farmar e vender",
+      topContributorsTitle: "👨‍🍳 Top Contribuintes",
+      zeroResultsTitle: "📉 Buscas Sem Resultado",
+      zeroResultsSub: "// O que os jogadores procuram mas ainda não existe · Contribua com essas receitas!",
+      statsSearchCount: "buscas",
+      statsVoteCount: "votos",
+      statsDemandScore: "pts demanda",
+      statsRecipesCount: "receitas",
+      statsNoData: "Sem dados ainda. Jogue e busque receitas para gerar estatísticas!",
+      statsBackToDashboard: "Voltar ao Dashboard"
     },
     forms: {
       recipeName: "Nome da Receita *",
@@ -317,7 +380,28 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       noPendingRecipes: "В данный момент нет рецептов на верификации.",
       uniqueRecipe: "⭐ Уникальный рецепт",
       uniqueRecipeBy: "Рецепт создан {creator} на сервере {server}",
-      back: "Назад"
+      back: "Назад",
+      statsLinkLabel: "Статистика & Рейтинги",
+      statsLinkSub: "Рецепты · Ингредиенты · Рынок",
+      statsExplore: "Перейти",
+      statsTitle: "Статистика & Рейтинги",
+      statsSubtitle: "// Данные сообщества · Аналитика рынка Wurm Online",
+      statsPeriod7: "7 дней",
+      statsPeriod30: "30 дней",
+      statsPeriodAll: "За всё время",
+      topSearchedTitle: "🔥 Самые искомые рецепты",
+      topVotedTitle: "❤️ Самые популярные рецепты",
+      ingredientDemandTitle: "📦 Ингредиенты в спросе",
+      ingredientDemandSub: "// На основе самых популярных поисков · Полезно для фарма и торговли",
+      topContributorsTitle: "👨‍🍳 Топ авторов",
+      zeroResultsTitle: "📉 Поиски без результата",
+      zeroResultsSub: "// Что ищут игроки, но чего ещё нет · Добавьте эти рецепты!",
+      statsSearchCount: "поисков",
+      statsVoteCount: "голосов",
+      statsDemandScore: "очки спроса",
+      statsRecipesCount: "рецептов",
+      statsNoData: "Данных пока нет. Играйте и ищите рецепты!",
+      statsBackToDashboard: "Вернуться к панели"
     },
     forms: {
       recipeName: "Название рецепта *",
