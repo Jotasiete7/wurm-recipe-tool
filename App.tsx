@@ -27,7 +27,13 @@ import ResetPasswordModal from './components/ResetPasswordModal';
 
 const AppContent: React.FC = () => {
   // --- State ---
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [recipeHistory, setRecipeHistory] = useState<Recipe[]>([]);
+  const activeRecipe = recipeHistory[recipeHistory.length - 1] || null;
+  
+  const handleOpenRecipe = (recipe: Recipe) => setRecipeHistory([recipe]);
+  const handleCloseRecipe = () => setRecipeHistory([]);
+  const handleBackRecipe = () => setRecipeHistory(prev => prev.slice(0, -1));
+
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
@@ -144,7 +150,7 @@ const AppContent: React.FC = () => {
           hint_ru: data.hint_ru,
           // Map other fields if necessary
         };
-        setSelectedRecipe(mappedRecipe);
+        setRecipeHistory(prev => [...prev, mappedRecipe]);
       }
     } catch (err) {
       console.error("Error fetching linked recipe:", err);
@@ -392,7 +398,7 @@ const AppContent: React.FC = () => {
                       t={t}
                     />
                     <TopRecipesCard
-                      onRecipeClick={setSelectedRecipe}
+                      onRecipeClick={handleOpenRecipe}
                       t={t}
                       lang={lang}
                     />
@@ -423,7 +429,7 @@ const AppContent: React.FC = () => {
                         t={t}
                       />
                       <TopRecipesCard
-                        onRecipeClick={setSelectedRecipe}
+                        onRecipeClick={handleOpenRecipe}
                         t={t}
                         lang={lang}
                       />
@@ -442,7 +448,7 @@ const AppContent: React.FC = () => {
                     <RecipeCard
                       key={`${recipe.name}-${idx}`}
                       recipe={recipe}
-                      onClick={setSelectedRecipe}
+                      onClick={handleOpenRecipe}
                       lang={lang}
                     />
                   ))}
@@ -515,8 +521,9 @@ const AppContent: React.FC = () => {
       </footer>
 
       <RecipeModal
-        recipe={selectedRecipe}
-        onClose={() => setSelectedRecipe(null)}
+        recipe={activeRecipe}
+        onClose={handleCloseRecipe}
+        onBack={recipeHistory.length > 1 ? handleBackRecipe : undefined}
         onRefresh={refresh}
         lang={lang}
         t={t}

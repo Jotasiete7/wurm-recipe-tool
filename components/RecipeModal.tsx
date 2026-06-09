@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Recipe, Language } from '../types';
 import { getEmoji, findRecipeMatch } from '../utils/dataUtils';
 import { translateSkill } from '../utils/translations';
-import { X, ChefHat, Box, Flame, Utensils, Edit3 } from 'lucide-react';
+import { X, ChefHat, Box, Flame, Utensils, Edit3, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import RecipeEditModal from './RecipeEditModal';
 import { supabase } from '../supabaseClient';
@@ -11,6 +11,7 @@ import { useNotification } from '../contexts/NotificationContext';
 interface RecipeModalProps {
   recipe: Recipe | null;
   onClose: () => void;
+  onBack?: () => void;
   onRefresh?: () => void;
   lang: Language;
   t: any;
@@ -21,6 +22,7 @@ interface RecipeModalProps {
 const RecipeModal: React.FC<RecipeModalProps> = ({
   recipe,
   onClose,
+  onBack,
   onRefresh,
   lang,
   t,
@@ -147,7 +149,18 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       <div className="relative w-full max-w-2xl bg-wurm-panel border border-wurm-border rounded shadow-2xl transform transition-all animate-in fade-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-wurm-panel to-black p-6 sm:p-8 border-b border-wurm-border">
+        <div className={`relative bg-gradient-to-r from-wurm-panel to-black p-6 sm:p-8 border-b border-wurm-border ${onBack ? 'pt-14' : ''}`}>
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="absolute top-4 left-4 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors flex items-center gap-1.5 shadow-md shadow-black/30"
+              title="Back to previous recipe"
+            >
+              <ArrowLeft size={16} />
+              <span className="text-xs font-mono font-bold uppercase tracking-wider pr-1 hidden sm:inline">{t.ui.back || 'Back'}</span>
+            </button>
+          )}
+
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors"
