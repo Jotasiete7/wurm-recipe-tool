@@ -29,7 +29,15 @@ export const CONTAINERS = [
   'Frying pan',
   'Baking stone',
   'Stone oven',
-  'Open Helmet'
+  'Open Helmet',
+  'Wine barrel',
+  'Wooden plate',
+  'Cake tin',
+  'Pie dish',
+  'Pottery jar',
+  'Gut',
+  'Roasting dish',
+  'Mushroom'
 ] as const;
 
 export const COOKERS = [
@@ -37,7 +45,8 @@ export const COOKERS = [
   'Campfire',
   'Stone oven',
   'Kiln',
-  'Forge'
+  'Forge',
+  'Open oven'
 ] as const;
 
 // Legacy Data Removed - Migrated to Supabase (2024-01-31)

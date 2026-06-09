@@ -177,7 +177,7 @@ export function parseOcrText(rawText: string): Partial<Recipe> {
   const matchedSkill = SKILLS_LIST.find(s => s.toLowerCase() === skill.toLowerCase()) || '';
 
   // Match cookers case-insensitively (e.g. forge -> Forge, oven -> Stone oven)
-  const COOKERS_LIST = ['None', 'Campfire', 'Stone oven', 'Kiln', 'Forge'];
+  const COOKERS_LIST = ['None', 'Campfire', 'Stone oven', 'Kiln', 'Forge', 'Open oven'];
   const matchedCooker = cookers.map(c => {
       const match = COOKERS_LIST.find(item => 
           item.toLowerCase() === c.toLowerCase() || 
@@ -188,7 +188,11 @@ export function parseOcrText(rawText: string): Partial<Recipe> {
   }).filter(Boolean)[0] || ''; // Select first match
 
   // Match containers case-insensitively (e.g. cauldron -> Cauldron)
-  const CONTAINERS_LIST = ['None', 'Bowl', 'Pottery bowl', 'Cauldron', 'Sauce pan', 'Frying pan', 'Baking stone', 'Stone oven', 'Open Helmet'];
+  const CONTAINERS_LIST = [
+    'None', 'Bowl', 'Pottery bowl', 'Cauldron', 'Sauce pan', 'Frying pan', 
+    'Baking stone', 'Stone oven', 'Open Helmet', 'Wine barrel', 'Wooden plate', 
+    'Cake tin', 'Pie dish', 'Pottery jar', 'Gut', 'Roasting dish', 'Mushroom'
+  ];
   const matchedContainer = containers.map(c => {
       const match = CONTAINERS_LIST.find(item => 
           item.toLowerCase() === c.toLowerCase() || 
