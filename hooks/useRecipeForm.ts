@@ -50,8 +50,18 @@ export function useRecipeForm(initialRecipe?: Recipe) {
     // Watch for updates of initialRecipe (e.g. after OCR finishes)
     useEffect(() => {
         if (initialRecipe) {
+            const name = initialRecipe.name || '';
+            const match = name.match(/^([^'\s]+)'s\s+/i);
+            const autoIsUnique = initialRecipe.is_unique || !!match;
+            let autoCreatorName = initialRecipe.creator_name || '';
+            if (!autoCreatorName && match) {
+                const rawCreator = match[1];
+                autoCreatorName = rawCreator.charAt(0).toUpperCase() + rawCreator.slice(1);
+            }
+            const autoServerName = initialRecipe.server_name || (match ? 'Harmony' : '');
+
             setFormData({
-                name: initialRecipe.name || '',
+                name: name,
                 skill: initialRecipe.skill || '',
                 container: initialRecipe.container || '',
                 cooker: initialRecipe.cooker || '',
@@ -65,9 +75,9 @@ export function useRecipeForm(initialRecipe?: Recipe) {
                 hintEn: initialRecipe.hint_en || '',
                 hintPt: initialRecipe.hint_pt || '',
                 hintRu: initialRecipe.hint_ru || '',
-                isUnique: initialRecipe.is_unique || false,
-                creatorName: initialRecipe.creator_name || '',
-                serverName: initialRecipe.server_name || '',
+                isUnique: autoIsUnique,
+                creatorName: autoCreatorName,
+                serverName: autoServerName,
             });
             setErrors({});
         }
@@ -80,7 +90,25 @@ export function useRecipeForm(initialRecipe?: Recipe) {
         field: K,
         value: RecipeFormData[K]
     ) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => {
+            const updated = { ...prev, [field]: value };
+            
+            // Auto-detect personal/unique recipes (e.g., Calvos's miracle brew)
+            if (field === 'name' && typeof value === 'string') {
+                const match = value.match(/^([^'\s]+)'s\s+/i);
+                if (match) {
+                    updated.isUnique = true;
+                    const rawCreator = match[1];
+                    updated.creatorName = rawCreator.charAt(0).toUpperCase() + rawCreator.slice(1);
+                    if (!updated.serverName) {
+                        updated.serverName = 'Harmony';
+                    }
+                }
+            }
+            
+            return updated;
+        });
+
         // Clear error when user starts typing
         if (errors[field as keyof RecipeFormErrors]) {
             setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -122,14 +150,6 @@ export function useRecipeForm(initialRecipe?: Recipe) {
 
         if (!formData.skill) {
             newErrors.skill = 'Skill is required';
-        }
-
-        if (!formData.container) {
-            newErrors.container = 'Container is required';
-        }
-
-        if (!formData.cooker) {
-            newErrors.cooker = 'Cooker is required';
         }
 
         // Validate ingredients
