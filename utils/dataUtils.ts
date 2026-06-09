@@ -36,6 +36,18 @@ export function findRecipeMatch(ingredient: string, allRecipeNames: Set<string>)
     const normName = name.toLowerCase();
     // Check if the recipe name is part of the ingredient
     if (normIngredient.includes(normName)) {
+      // Skip matches where the ingredient has a state modifier (like fermenting)
+      // that the matched recipe does not have (e.g. "fermenting effervescent beer" shouldn't match "beer")
+      const modifiers = ['fermenting', 'unfermented', 'undistilled', 'distilled'];
+      let skip = false;
+      for (const mod of modifiers) {
+        if (normIngredient.includes(mod) && !normName.includes(mod)) {
+          skip = true;
+          break;
+        }
+      }
+      if (skip) continue;
+
       // Keep the longest match found so far
       if (normName.length > bestMatch.length) {
         bestMatch = normName;
