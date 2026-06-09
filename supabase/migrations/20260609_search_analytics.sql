@@ -142,3 +142,92 @@ WHERE status IN ('verified', 'legacy_verified', 'highly_trusted')
 GROUP BY source
 ORDER BY recipe_count DESC
 LIMIT 20;
+
+
+-- ============================================================
+-- 6. RPC FUNCTIONS FOR PERIOD FILTERING
+-- Used by the stats page to fetch period-specific rankings.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION get_top_searched(since timestamptz, lim int)
+RETURNS TABLE (
+  recipe_id uuid,
+  recipe_name text,
+  search_count int
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    s.recipe_id,
+    s.recipe_name,
+    COUNT(*)::int AS search_count
+  FROM search_logs s
+  WHERE s.found = true
+    AND s.recipe_id IS NOT NULL
+    AND s.created_at >= since
+  GROUP BY s.recipe_id, s.recipe_name
+  ORDER BY search_count DESC
+  LIMIT lim;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+CREATE OR REPLACE FUNCTION get_top_ingredients(since timestamptz, lim int)
+RETURNS TABLE (
+  ingredient text,
+  demand_score int,
+  recipe_count int
+) AS $$
+BEGIN
+  RETURN QUERY
+  WITH searched AS (
+    SELECT
+      s.recipe_id,
+      COUNT(*)::int AS search_count
+    FROM search_logs s
+    WHERE s.found = true
+      AND s.recipe_id IS NOT NULL
+      AND s.created_at >= since
+    GROUP BY s.recipe_id
+  ),
+  split_ingredients AS (
+    SELECT
+      r.id AS recipe_id,
+      trim(unnest(string_to_array(r.mandatory, ','))) AS ingredient
+    FROM recipes r
+    INNER JOIN searched s ON s.recipe_id = r.id
+    WHERE r.mandatory IS NOT NULL AND length(r.mandatory) > 0
+  )
+  SELECT
+    si.ingredient,
+    SUM(s.search_count)::int AS demand_score,
+    COUNT(DISTINCT si.recipe_id)::int AS recipe_count
+  FROM split_ingredients si
+  INNER JOIN searched s ON s.recipe_id = si.recipe_id
+  WHERE length(si.ingredient) > 2
+    AND si.ingredient NOT ILIKE '%water%'
+  GROUP BY si.ingredient
+  ORDER BY demand_score DESC
+  LIMIT lim;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+CREATE OR REPLACE FUNCTION get_zero_results(since timestamptz, lim int)
+RETURNS TABLE (
+  term text,
+  search_count int
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    lower(trim(s.term)) AS term,
+    COUNT(*)::int AS search_count
+  FROM search_logs s
+  WHERE s.found = false
+    AND s.created_at >= since
+  GROUP BY lower(trim(s.term))
+  ORDER BY search_count DESC
+  LIMIT lim;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
