@@ -30,6 +30,7 @@
     - Um jogador não pode confirmar seu próprio envio. O banco valida se o hash SHA256 do IP do eleitor coincide com o IP do criador do envio original em `recipe_proofs`.
   - **Custom Notification Context (`useNotification`):**
     - Centralizou caixas de diálogo no frontend com `NotificationProvider`, substituindo `alert()` nativos por modais estilizados com efeitos de desfoque (`backdrop-blur`), bordas douradas e ícones Lucide.
-  - **Solução do Bug PL/pgSQL (`record "r" is not assigned yet`):**
-    - A função `submit_recipe_proof` declarava uma variável local `r record;` para o loop principal. A query de verificação inicial de confiabilidade usava a tabela alias `recipes r`. Devido às regras de escopo do PL/pgSQL, a consulta tentava ler o registro local `r` em vez do alias da tabela.
     - **Solução:** Renomeado o alias da tabela de `r` para `rec` na consulta de confiabilidade, eliminando o conflito com a variável de loop. Hotfix salvo em `supabase/migrations/20260608_fix_shadowing.sql`.
+  - **Melhorias de UX (Envio de Receitas Culinárias e Pessoais):**
+    - **Campos Opcionais (Recipiente & Cozinador):** Cooker e Container foram tornados opcionais no formulário (já que no jogo nem toda receita os exige, como em Butchering ou Beverages). Caso sejam omitidos, o site envia-os como strings vazias, as quais o banco de dados já suporta nativamente. Os asteriscos (`*`) correspondentes foram removidos das traduções nos idiomas EN/PT/RU.
+    - **Autodetecção de Receitas Únicas:** Criado um padrão de reconhecimento no hook `useRecipeForm`. Quando o nome de uma receita contendo `'s` (ex: `Calvos's miracle brew`) é digitado ou lido pelo OCR, o formulário automaticamente marca o checkbox de "Receita Única", extrai e capitaliza o nome do autor (ex: `Calvos`) e atribui o servidor padrão como `Harmony`.
