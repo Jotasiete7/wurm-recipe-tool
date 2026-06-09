@@ -125,18 +125,19 @@ LIMIT 20;
 
 
 -- ============================================================
--- 5. VIEW: contributor_stats (if not already created)
+-- 5. VIEW: contributor_stats
 -- Top recipe contributors by verified recipe count.
+-- submitted_by is UUID type — must cast to text before using
+-- in COALESCE or string comparisons.
 -- ============================================================
 
 CREATE OR REPLACE VIEW contributor_stats AS
 SELECT
-  COALESCE(submitted_by, 'Anonymous') AS source,
+  submitted_by::text AS source,
   COUNT(*)::int AS recipe_count
 FROM recipes
 WHERE status IN ('verified', 'legacy_verified', 'highly_trusted')
   AND submitted_by IS NOT NULL
-  AND submitted_by <> ''
 GROUP BY submitted_by
 ORDER BY recipe_count DESC
 LIMIT 20;
