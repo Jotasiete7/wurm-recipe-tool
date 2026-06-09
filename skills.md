@@ -48,3 +48,35 @@
   - **Botão Voltar (Back):** Renderização condicional de um botão "Voltar" (traduzido para EN: `"Back"`, PT: `"Voltar"`, RU: `"Назад"`) no canto superior esquerdo do cabeçalho do modal se houver mais de uma receita na pilha.
   - **Limpeza do Estado:** Fechar o modal por completo limpa todo o histórico de navegação acumulado.
 
+## 🔮 Próximas Features em Discussão
+
+### [09 de Junho de 2026] — Search Analytics + Inteligência de Mercado de Ingredientes
+> Ideia aprovada em conversa. **Não implementada ainda.** Aguarda sprint futuro.
+
+- **Conceito Central:** Registrar buscas dos usuários no campo de pesquisa e cruzá-las com os ingredientes das receitas encontradas para gerar um **índice de demanda de mercado** de ingredientes.
+- **Fluxo de dados pensado:**
+  ```
+  Jogador busca "Calvos's miracle brew"
+      ↓
+  Receita encontrada requer: [Hop, Water, Barley, Sugar]
+      ↓
+  Esses ingredientes recebem +1 de "demanda" naquele período
+      ↓
+  Ranking de ingredientes em alta = dado de comércio real
+  ```
+- **Tabela proposta no Supabase:** `search_logs`
+  - `term` — string buscada
+  - `recipe_found_id` — UUID da receita encontrada/clicada (nullable se zero results)
+  - `lang` — idioma do usuário no momento
+  - `created_at` — timestamp
+- **Estratégia de captura:** Debounce de ~500ms após o usuário parar de digitar, mínimo 3 caracteres. Capturar só quando houver resultado OU explicitamente registrar como "zero results" (dado valioso: receita que a comunidade quer mas não existe).
+- **Visualizações planejadas:**
+  - 🔥 **Receitas em Alta** — top buscadas da semana/mês (ranking alternativo ao de curtidas)
+  - 📦 **Ingredientes em Demanda** — ranking derivado das receitas mais buscadas
+  - 📉 **Zero Results** — buscas sem resultado = lista de receitas que a comunidade quer que existam
+- **Por que é diferente dos rankings atuais:**
+  - Ranking de curtidas = aprovação pós-visualização (viés para receitas antigas)
+  - Ranking de buscas = **intenção e necessidade real** dos jogadores ativos agora
+- **Potencial estratégico:** Transforma o site de guia de receitas em uma **ferramenta econômica** — vendedores sabem o que produzir, compradores veem o que está em alta. Diferencial único no ecossistema Wurm Online.
+- **Dependências técnicas:** Search atual é client-side (filtra em memória). Precisará de um hook/interceptor para logar buscas no Supabase sem impactar performance.
+
