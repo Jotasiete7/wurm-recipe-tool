@@ -67,15 +67,15 @@ const Stats: React.FC<StatsProps> = ({ recipes, t, lang, totalCount }) => {
   return (
     <div className="bg-wurm-panel rounded border border-wurm-border p-6 shadow-lg">
       <h3 className="text-sm font-bold font-mono text-wurm-text mb-4 text-center uppercase tracking-widest border-b border-wurm-border pb-2">{t.ui.skillDist}</h3>
-      <div className="h-64 w-full">
+      <div className="h-64 w-full relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              cy="45%"
+              innerRadius={55}
+              outerRadius={75}
               paddingAngle={4}
               dataKey="value"
               stroke="none"
@@ -90,18 +90,22 @@ const Stats: React.FC<StatsProps> = ({ recipes, t, lang, totalCount }) => {
             />
             <Legend
               verticalAlign="bottom"
-              height={36}
+              height={45}
               iconType="circle"
-              wrapperStyle={{ fontSize: '10px', fontFamily: 'JetBrains Mono', paddingTop: '10px', color: '#737373' }}
+              wrapperStyle={{ fontSize: '9px', fontFamily: 'JetBrains Mono', paddingTop: '5px', color: '#737373', lineHeight: '14px' }}
             />
           </PieChart>
         </ResponsiveContainer>
-      </div>
-      <div className="mt-4 text-center">
-        <span className="text-4xl font-serif font-bold text-wurm-accent block">
-          {displayCount}
-        </span>
-        <p className="text-wurm-muted text-[10px] font-mono uppercase tracking-widest">{t.ui.totalRecipes}</p>
+
+        {/* Centered Donut Label */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ transform: 'translateY(-22px)' }}>
+          <span className="text-2xl font-serif font-bold text-wurm-accent block">
+            {displayCount}
+          </span>
+          <span className="text-wurm-muted text-[8px] font-mono uppercase tracking-widest block mt-0.5">
+            {t.ui.totalRecipes}
+          </span>
+        </div>
       </div>
     </div>
   );

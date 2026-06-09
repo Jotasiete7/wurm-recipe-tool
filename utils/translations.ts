@@ -369,7 +369,8 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
 };
 
 export const translateSkill = (skill: string, lang: Language): string => {
-  // Try to find the skill in the dictionary, fallback to English/Original
+  if (!skill) return '';
   const dict = TRANSLATIONS[lang].skills;
-  return dict[skill] || skill;
+  const matchKey = Object.keys(dict).find(k => k.toLowerCase() === skill.toLowerCase());
+  return matchKey ? dict[matchKey] : skill.charAt(0).toUpperCase() + skill.slice(1);
 };
