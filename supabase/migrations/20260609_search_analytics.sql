@@ -134,12 +134,14 @@ DROP VIEW IF EXISTS contributor_stats;
 
 CREATE VIEW contributor_stats AS
 SELECT
-  source::text AS source,
-  COUNT(*) AS recipe_count
-FROM recipes
-WHERE status IN ('verified', 'legacy_verified', 'highly_trusted')
-  AND source IS NOT NULL
-GROUP BY source
+  rp.source AS source,
+  COUNT(*)::int AS recipe_count
+FROM recipe_proofs rp
+INNER JOIN recipes r ON r.id = rp.recipe_id
+WHERE r.status IN ('verified', 'legacy_verified')
+  AND rp.source IS NOT NULL
+  AND rp.source <> ''
+GROUP BY rp.source
 ORDER BY recipe_count DESC
 LIMIT 20;
 
