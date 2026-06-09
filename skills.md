@@ -43,3 +43,8 @@
       - **Solução:**
         1. Tornei o método de tradução `translateSkill` em `translations.ts` insensível a maiúsculas/minúsculas (case-insensitive). Isso agrupa de forma automática e inteligente as habilidades duplicadas, reduzindo o número de elementos exibidos na legenda.
         2. Reposicionei o contador de total de receitas de forma absoluta no **centro vazio do gráfico donut** (estilo card premium), liberando espaço na base do componente e eliminando qualquer possibilidade de colisão visual.
+- **[09 de Junho de 2026]**: Histórico de Navegação de Receitas no Modal (`RecipeModal.tsx`):
+  - **Histórico de Navegação (Pilha):** Substituição do estado único `selectedRecipe` no `App.tsx` por um array/pilha `recipeHistory`. Isso permite que cliques em sub-receitas empilhem novas receitas, mantendo o histórico de visualização do usuário.
+  - **Botão Voltar (Back):** Renderização condicional de um botão "Voltar" (traduzido para EN: `"Back"`, PT: `"Voltar"`, RU: `"Назад"`) no canto superior esquerdo do cabeçalho do modal se houver mais de uma receita na pilha.
+  - **Limpeza do Estado:** Fechar o modal por completo limpa todo o histórico de navegação acumulado.
+
