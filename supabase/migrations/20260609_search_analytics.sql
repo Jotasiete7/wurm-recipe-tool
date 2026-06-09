@@ -127,19 +127,18 @@ LIMIT 20;
 -- ============================================================
 -- 5. VIEW: contributor_stats
 -- Top recipe contributors by verified recipe count.
--- Uses 'source' (text display name), NOT submitted_by (uuid).
+-- 'source' is an ENUM — cast to text, filter only IS NOT NULL.
 -- ============================================================
 
 DROP VIEW IF EXISTS contributor_stats;
 
 CREATE VIEW contributor_stats AS
 SELECT
-  source,
+  source::text AS source,
   COUNT(*) AS recipe_count
 FROM recipes
 WHERE status IN ('verified', 'legacy_verified', 'highly_trusted')
   AND source IS NOT NULL
-  AND source <> ''
 GROUP BY source
 ORDER BY recipe_count DESC
 LIMIT 20;
