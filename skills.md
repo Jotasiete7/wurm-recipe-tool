@@ -48,10 +48,31 @@
   - **Botão Voltar (Back):** Renderização condicional de um botão "Voltar" (traduzido para EN: `"Back"`, PT: `"Voltar"`, RU: `"Назад"`) no canto superior esquerdo do cabeçalho do modal se houver mais de uma receita na pilha.
   - **Limpeza do Estado:** Fechar o modal por completo limpa todo o histórico de navegação acumulado.
 
-## 🔮 Próximas Features em Discussão
+## 🔮 Features Implementadas em Sprint Recente
 
-### [09 de Junho de 2026] — Search Analytics + Inteligência de Mercado de Ingredientes
-> Ideia aprovada em conversa. **Não implementada ainda.** Aguarda sprint futuro.
+### [09 de Junho de 2026] — Página de Estatísticas & Rankings + Search Analytics
+
+- **Card de Entrada:** `TopRecipesCard.tsx` substituído por `StatsLinkCard` — botão premium com ícone `BarChart2`, glow animado no hover e seta, que navega para a página `/stats`.
+- **Navegação sem Router:** Controle de página via estado `currentPage: 'home' | 'stats'` no `App.tsx`. A página inteira é trocada condicionalmente, sem dependência de React Router.
+- **Hook `useSearchLogger` (`hooks/useSearchLogger.ts`):**
+  - Captura buscas no campo de pesquisa com **debounce de 800ms** e mínimo de 3 caracteres.
+  - Grava na tabela `search_logs` no Supabase de forma **assíncrona e silenciosa** (nunca bloqueia nem quebra o app).
+  - Registra tanto buscas **com resultado** (`found=true`, com `recipe_id`) quanto buscas **sem resultado** (`found=false`) — dado valioso de mercado.
+- **Tabela `search_logs` (Supabase):** `id`, `term`, `recipe_id` (FK nullable), `recipe_name`, `lang`, `found`, `created_at`. RLS: anon pode inserir, autenticados podem ler.
+- **Views de agregação criadas:**
+  - `top_searched_recipes` — receitas mais buscadas (sem filtro de período, filtrável via RPC)
+  - `top_demanded_ingredients` — cruza buscas → receitas → ingredientes (via `unnest` + `string_to_array` no campo `mandatory`) para gerar score de demanda de mercado
+  - `zero_result_searches` — termos buscados sem resultado, agrupados e ordenados
+  - `contributor_stats` — top contribuintes por contagem de receitas verificadas
+- **`StatsPage.tsx` (`components/StatsPage.tsx`):** Página dedicada com 5 seções:
+  1. 🔥 Receitas Mais Buscadas (ranking clicável que abre o modal)
+  2. ❤️ Receitas Mais Votadas (ranking clicável)
+  3. 📦 Ingredientes em Alta no Mercado (gráfico de barras horizontal `recharts`, barras douradas para top 3)
+  4. 👨‍🍳 Top Contribuintes
+  5. 📉 Buscas Sem Resultado
+- **Seletor de Período:** Botões 7 Dias / 30 Dias / Todos os Tempos. Para períodos filtrados, tenta RPC com `since` e faz fallback para a view geral se o RPC não existir.
+- **Arquivo SQL:** `supabase/migrations/20260609_search_analytics.sql` — executar manualmente no painel do Supabase antes do deploy.
+
 
 - **Conceito Central:** Registrar buscas dos usuários no campo de pesquisa e cruzá-las com os ingredientes das receitas encontradas para gerar um **índice de demanda de mercado** de ingredientes.
 - **Fluxo de dados pensado:**
