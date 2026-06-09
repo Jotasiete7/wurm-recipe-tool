@@ -127,19 +127,19 @@ LIMIT 20;
 -- ============================================================
 -- 5. VIEW: contributor_stats
 -- Top recipe contributors by verified recipe count.
--- submitted_by is UUID type — cast to text for display.
--- DROP first: CREATE OR REPLACE cannot change column types.
+-- Uses 'source' (text display name), NOT submitted_by (uuid).
 -- ============================================================
 
 DROP VIEW IF EXISTS contributor_stats;
 
 CREATE VIEW contributor_stats AS
 SELECT
-  submitted_by::text AS source,
+  source,
   COUNT(*) AS recipe_count
 FROM recipes
 WHERE status IN ('verified', 'legacy_verified', 'highly_trusted')
-  AND submitted_by IS NOT NULL
-GROUP BY submitted_by
+  AND source IS NOT NULL
+  AND source <> ''
+GROUP BY source
 ORDER BY recipe_count DESC
 LIMIT 20;
