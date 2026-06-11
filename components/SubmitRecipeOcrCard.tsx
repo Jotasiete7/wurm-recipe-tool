@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, ImageUp, HelpCircle, X } from 'lucide-react';
+import correctImg from '../recipe_guide_correct.png';
+import incorrectImg from '../recipe_guide_incorrect.png';
 
 interface SubmitRecipeOcrCardProps {
   onFileSelect: (files: File[]) => void;
@@ -178,7 +180,7 @@ const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect,
                 </div>
                 <div className="w-full flex-1 flex items-center justify-center bg-black/45 rounded p-1 border border-wurm-border/30">
                   <img 
-                    src="/recipe_guide_correct.png" 
+                    src={correctImg} 
                     alt={t.forms.ocrHelpCorrect} 
                     className="rounded max-h-[220px] object-contain shadow-md"
                   />
@@ -193,7 +195,7 @@ const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect,
                 </div>
                 <div className="w-full flex-1 flex items-center justify-center bg-black/45 rounded p-1 border border-wurm-border/30">
                   <img 
-                    src="/recipe_guide_incorrect.png" 
+                    src={incorrectImg} 
                     alt={t.forms.ocrHelpIncorrect} 
                     className="rounded max-h-[220px] object-contain shadow-md opacity-85"
                   />
