@@ -23,6 +23,7 @@ import TopRecipesCard from './components/TopRecipesCard';
 import PendingInfoCard from './components/PendingInfoCard';
 import StatsPage from './components/StatsPage';
 import { useSearchLogger } from './hooks/useSearchLogger';
+import { useDebounce } from './hooks/useDebounce';
 import { Search, RotateCcw, User, LogOut, Plus } from 'lucide-react';
 
 import ResetPasswordModal from './components/ResetPasswordModal';
@@ -60,6 +61,8 @@ const AppContent: React.FC = () => {
     cooker: ''
   });
 
+  const debouncedSearchTerm = useDebounce(filters.search, 500);
+
   const [allRecipeNames, setAllRecipeNames] = useState<Set<string>>(new Set());
 
   const [lang, setLang] = useState<Language>(() => {
@@ -85,7 +88,7 @@ const AppContent: React.FC = () => {
     refresh,
   } = usePaginatedRecipes({
     itemsPerPage: 50,
-    searchTerm: filters.search,
+    searchTerm: debouncedSearchTerm,
     pendingOnly: pendingOnly,
   });
 
@@ -184,7 +187,7 @@ const AppContent: React.FC = () => {
   // Passive hook — logs searches to Supabase with 800ms debounce.
   // Never blocks or throws. Captures both found and zero-result searches.
   useSearchLogger(
-    filters.search,
+    debouncedSearchTerm,
     filteredRecipes.length,
     lang,
     filteredRecipes[0]?.id,

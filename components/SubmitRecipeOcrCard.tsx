@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Camera, ImageUp, HelpCircle, X } from 'lucide-react';
 
 interface SubmitRecipeOcrCardProps {
@@ -9,6 +9,11 @@ interface SubmitRecipeOcrCardProps {
 const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect, t }) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCardClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -66,6 +71,7 @@ const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect,
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
+        onClick={handleCardClick}
         className={`group relative bg-wurm-panel rounded border transition-all duration-300 cursor-pointer overflow-hidden shadow-black shadow-lg flex flex-col justify-between h-[170px] ${
           isDragActive
             ? 'border-wurm-accent bg-wurm-accent/5 scale-[1.01]'
@@ -73,12 +79,12 @@ const SubmitRecipeOcrCard: React.FC<SubmitRecipeOcrCardProps> = ({ onFileSelect,
         }`}
       >
         <input
+          ref={fileInputRef}
           type="file"
           multiple
           accept="image/*"
           onChange={handleFileChange}
-          className="absolute inset-0 opacity-0 cursor-pointer z-20"
-          title=""
+          className="hidden"
         />
 
         <div className="absolute inset-y-0 left-0 w-0.5 bg-wurm-accent opacity-0 group-hover:opacity-100 transition-opacity" />
