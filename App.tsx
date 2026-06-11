@@ -24,7 +24,7 @@ import PendingInfoCard from './components/PendingInfoCard';
 import StatsPage from './components/StatsPage';
 import { useSearchLogger } from './hooks/useSearchLogger';
 import { useDebounce } from './hooks/useDebounce';
-import { Search, RotateCcw, User, LogOut, Plus } from 'lucide-react';
+import { Search, RotateCcw, User, LogOut } from 'lucide-react';
 
 import ResetPasswordModal from './components/ResetPasswordModal';
 
@@ -245,14 +245,6 @@ const AppContent: React.FC = () => {
           }}
           extraModules={
             <>
-              <button
-                onClick={() => setShowSubmitModal(true)}
-                className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted border-r border-wurm-border/50 pr-3"
-                title="Submit New Recipe"
-              >
-                <Plus size={14} />
-                <span className="hidden sm:inline">Add Recipe</span>
-              </button>
               <LanguageSwitch
                 lang={lang}
                 onLanguageChange={(l) => {
@@ -323,14 +315,6 @@ const AppContent: React.FC = () => {
         }}
         extraModules={
           <>
-            <button
-              onClick={() => setShowSubmitModal(true)}
-              className="flex items-center gap-1 hover:text-wurm-accent transition-colors px-2 text-[10px] font-mono uppercase tracking-widest text-wurm-muted border-r border-wurm-border/50 pr-3"
-              title="Submit New Recipe"
-            >
-              <Plus size={14} />
-              <span className="hidden sm:inline">Add Recipe</span>
-            </button>
             <LanguageSwitch 
               lang={lang} 
               onLanguageChange={(l) => {
