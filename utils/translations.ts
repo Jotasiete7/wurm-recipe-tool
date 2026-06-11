@@ -101,6 +101,12 @@ interface TranslationData {
     ocrSubmitCardTitle: string;
     ocrSubmitCardDesc: string;
     ocrSubmitCardSuccess: string;
+    ocrHelpLink: string;
+    ocrHelpTitle: string;
+    ocrHelpDesc: string;
+    ocrHelpCorrect: string;
+    ocrHelpIncorrect: string;
+    ocrHelpClose: string;
     isUniqueLabel: string;
     creatorNameLabel: string;
     serverNameLabel: string;
@@ -210,6 +216,12 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       ocrSubmitCardTitle: "Drag & drop your recipe print",
       ocrSubmitCardDesc: "Drag your screenshot or paste (Ctrl+V) to read automatically",
       ocrSubmitCardSuccess: "OCR read successfully! Check the fields below.",
+      ocrHelpLink: "How to print?",
+      ocrHelpTitle: "Recipe Screenshot Guide",
+      ocrHelpDesc: "For the reader to work correctly, take the screenshot in-game with all sub-recipes collapsed (showing the [+] symbol). Sub-recipes expanded with their own cookers and ingredients will confuse the scanner.",
+      ocrHelpCorrect: "Correct (Collapsed)",
+      ocrHelpIncorrect: "Incorrect (Expanded)",
+      ocrHelpClose: "Close Guide",
       isUniqueLabel: "Is this a personal / unique recipe?",
       creatorNameLabel: "Original Creator Name",
       serverNameLabel: "Server Name"
@@ -325,6 +337,12 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       ocrSubmitCardTitle: "Arraste o print da sua receita",
       ocrSubmitCardDesc: "Arraste o print ou cole (Ctrl+V) para ler automaticamente",
       ocrSubmitCardSuccess: "Leitura OCR realizada! Verifique os campos abaixo.",
+      ocrHelpLink: "Como printar?",
+      ocrHelpTitle: "Guia de Captura de Receita",
+      ocrHelpDesc: "Para o leitor funcionar corretamente, tire o print dentro do jogo com todas as sub-receitas fechadas (sinal de [+]). Sub-receitas abertas exibindo seus próprios cozinadores e ingredientes confundem o scanner.",
+      ocrHelpCorrect: "Correto (Colapsado)",
+      ocrHelpIncorrect: "Incorreto (Expandido)",
+      ocrHelpClose: "Fechar Guia",
       isUniqueLabel: "Esta receita é única / pessoal?",
       creatorNameLabel: "Nome do Criador Original",
       serverNameLabel: "Nome do Servidor"
@@ -440,6 +458,12 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       ocrSubmitCardTitle: "Перетащите скриншот рецепта",
       ocrSubmitCardDesc: "Перетащите файл или вставьте (Ctrl+V) для авточтения",
       ocrSubmitCardSuccess: "Текст успешно распознан! Проверьте поля ниже.",
+      ocrHelpLink: "Как сделать скриншот?",
+      ocrHelpTitle: "Руководство по скриншотам рецептов",
+      ocrHelpDesc: "Для корректной работы сканера делайте скриншот в игре со всеми свернутыми подрецептами (показывая символ [+]). Развернутые подрецепты со своими плитами и ингредиентами запутают сканер.",
+      ocrHelpCorrect: "Правильно (Свернуто)",
+      ocrHelpIncorrect: "Неправильно (Развернуто)",
+      ocrHelpClose: "Закрыть руководство",
       isUniqueLabel: "Это личный / уникальный рецепт?",
       creatorNameLabel: "Имя создателя",
       serverNameLabel: "Имя сервера"
