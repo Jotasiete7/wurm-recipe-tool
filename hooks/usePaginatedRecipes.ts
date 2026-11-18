@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { Recipe } from '../types';
+import { queryCatalog } from '../utils/catalog';
 
 interface UsePaginatedRecipesOptions {
     itemsPerPage?: number;
     searchTerm?: string;
     pendingOnly?: boolean;
+    skill?: string;
+    container?: string;
+    cooker?: string;
 }
 
 interface UsePaginatedRecipesResult {
@@ -27,14 +31,33 @@ export function usePaginatedRecipes({
     itemsPerPage = 50,
     searchTerm = '',
     pendingOnly = false,
+    skill = '',
+    container = '',
+    cooker = '',
 }: UsePaginatedRecipesOptions = {}): UsePaginatedRecipesResult {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
 
     const fetchRecipes = useCallback(async () => {
+        if (!pendingOnly) {
+            const result = queryCatalog({
+                searchTerm,
+                skill,
+                container,
+                cooker,
+                page,
+                itemsPerPage,
+            });
+            setRecipes(result.items);
+            setTotalCount(result.total);
+            setError(null);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -101,7 +124,7 @@ export function usePaginatedRecipes({
         } finally {
             setLoading(false);
         }
-    }, [page, itemsPerPage, searchTerm, pendingOnly]);
+    }, [page, itemsPerPage, searchTerm, pendingOnly, skill, container, cooker]);
 
     useEffect(() => {
         fetchRecipes();
@@ -112,7 +135,7 @@ export function usePaginatedRecipes({
         if (page !== 0) {
             setPage(0);
         }
-    }, [searchTerm, pendingOnly]); // Don't include page in deps to avoid infinite loop
+    }, [searchTerm, pendingOnly, skill, container, cooker]); // Don't include page in deps to avoid infinite loop
 
     const totalPages = Math.ceil(totalCount / itemsPerPage);
     const hasNextPage = page < totalPages - 1;

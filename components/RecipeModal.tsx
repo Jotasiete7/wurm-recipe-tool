@@ -2,11 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Recipe, Language } from '../types';
 import { getEmoji, findRecipeMatch } from '../utils/dataUtils';
 import { translateSkill } from '../utils/translations';
-import { X, ChefHat, Box, Flame, Utensils, Edit3, ArrowLeft } from 'lucide-react';
+import { X, ChefHat, Box, Flame, Utensils, Edit3, ArrowLeft, Crosshair, Target } from 'lucide-react';
+import { formatRecipePart } from '../utils/catalog';
 import { useAuth } from '../contexts/AuthContext';
 import RecipeEditModal from './RecipeEditModal';
 import { supabase } from '../supabaseClient';
 import { useNotification } from '../contexts/NotificationContext';
+
+const GROUP_LABELS: Record<Language, Record<string, string>> = {
+  en: { mandatory: 'Mandatory', optional: 'Optional', oneormore: 'One or more', oneof: 'One of', any: 'Any', zeroorone: 'Zero or one' },
+  pt: { mandatory: 'Obrigatórios', optional: 'Opcionais', oneormore: 'Um ou mais', oneof: 'Um destes', any: 'Qualquer', zeroorone: 'Nenhum ou um' },
+  ru: { mandatory: 'Обязательные', optional: 'Необязательные', oneormore: 'Один или больше', oneof: 'Один из', any: 'Любой', zeroorone: 'Ноль или один' },
+};
+
+function groupLabel(key: string, lang: Language): string {
+  return GROUP_LABELS[lang][key] || key;
+}
 
 interface RecipeModalProps {
   recipe: Recipe | null;
@@ -38,14 +49,17 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
   const [votedToday, setVotedToday] = useState(false);
   const [voting, setVoting] = useState(false);
 
+  const persistable = Boolean(recipe?.id && recipe.id.includes('-'));
+
   // Load vote state and run time gate
   useEffect(() => {
-    if (!recipe || !recipe.id) return;
+    if (!recipe?.id || !persistable) return;
+    const recipeId = recipe.id;
 
     // Check if voted today in localStorage
     const votedList = JSON.parse(localStorage.getItem('wurm_voted_recipes') || '{}');
     const todayStr = new Date().toISOString().split('T')[0];
-    if (votedList[recipe.id] === todayStr) {
+    if (votedList[recipeId] === todayStr) {
       setVotedToday(true);
     } else {
       setVotedToday(false);
@@ -57,7 +71,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       const { count, error } = await supabase
         .from('recipe_votes')
         .select('*', { count: 'exact', head: true })
-        .eq('recipe_id', recipe.id)
+        .eq('recipe_id', recipeId)
         .gte('voted_at', startOfMonth);
       
       if (!error && count !== null) {
@@ -79,7 +93,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [recipe]);
+  }, [recipe, persistable]);
 
   const handleVote = async () => {
     if (timeLeft > 0 || votedToday || !recipe || !recipe.id || voting) return;
@@ -137,7 +151,28 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 
   if (!recipe) return null;
 
-  const ingredients = recipe.mandatory ? recipe.mandatory.split(';').map(i => i.trim()) : [];
+  const ingredientSections = recipe.ingredientGroups?.length
+    ? recipe.ingredientGroups
+    : (recipe.mandatory
+      ? [{ key: 'mandatory', items: recipe.mandatory.split(';').map(item => item.trim()).filter(Boolean) }]
+      : []);
+
+  const detailCards = [
+    recipe.container ? { key: 'container', label: t.ui.containerLabel, value: recipe.container, icon: <Box size={18} /> } : null,
+    recipe.cooker ? { key: 'cooker', label: t.ui.cookerLabel, value: recipe.cooker, icon: <Flame size={18} /> } : null,
+    recipe.active ? {
+      key: 'active',
+      label: lang === 'pt' ? 'Ativo' : lang === 'ru' ? 'Активный' : 'Active',
+      value: formatRecipePart(recipe.active),
+      icon: <Crosshair size={18} />,
+    } : null,
+    recipe.target ? {
+      key: 'target',
+      label: lang === 'pt' ? 'Alvo' : lang === 'ru' ? 'Цель' : 'Target',
+      value: formatRecipePart(recipe.target),
+      icon: <Target size={18} />,
+    } : null,
+  ].filter((card): card is { key: string; label: string; value: string; icon: JSX.Element } => card !== null);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -169,7 +204,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
           </button>
 
           {/* Edit Button (Admin Only) */}
-          {isAdmin && recipe.id && (
+          {isAdmin && persistable && (
             <button
               onClick={() => setShowEditModal(true)}
               className="absolute top-4 right-16 p-2 bg-black/40 hover:bg-wurm-accent/20 rounded-full text-wurm-muted hover:text-wurm-accent transition-colors"
@@ -245,76 +280,87 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
           )}
 
           {/* Main Attributes Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {recipe.container && (
-              <div className="bg-wurm-panel p-4 rounded border border-wurm-border hover:border-wurm-border/80 transition-colors">
-                <div className="flex items-center gap-3 text-wurm-accentDim mb-2">
-                  <Box size={18} />
-                  <span className="font-bold text-[10px] font-mono uppercase tracking-widest">{t.ui.containerLabel}</span>
-                </div>
-                <p className="text-wurm-text font-serif text-lg">{recipe.container}</p>
-              </div>
-            )}
-
-            {recipe.cooker && (
-              <div className="bg-wurm-panel p-4 rounded border border-wurm-border hover:border-wurm-border/80 transition-colors">
-                <div className="flex items-center gap-3 text-wurm-accentDim mb-2">
-                  <Flame size={18} />
-                  <span className="font-bold text-[10px] font-mono uppercase tracking-widest">{t.ui.cookerLabel}</span>
-                </div>
-                <p className="text-wurm-text font-serif text-lg">{recipe.cooker}</p>
-              </div>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {recipe.skill && (
-              <div className="bg-wurm-panel p-4 rounded border border-wurm-border col-span-1 sm:col-span-2 hover:border-wurm-border/80 transition-colors">
+              <div className="bg-wurm-panel p-4 rounded border border-wurm-border sm:col-span-2">
                 <div className="flex items-center gap-3 text-wurm-accentDim mb-2">
                   <ChefHat size={18} />
                   <span className="font-bold text-[10px] font-mono uppercase tracking-widest">{t.ui.skillCategory}</span>
                 </div>
                 <p className="text-wurm-text font-serif text-lg">{translateSkill(recipe.skill, lang)}</p>
+                {(recipe.trigger || typeof recipe.difficulty === 'number') && (
+                  <p className="text-xs text-wurm-muted font-mono mt-1">
+                    {[recipe.trigger, typeof recipe.difficulty === 'number' ? `difficulty ${recipe.difficulty}` : ''].filter(Boolean).join(' · ')}
+                  </p>
+                )}
               </div>
             )}
+            {detailCards.map((card, index) => (
+              <div
+                key={card.key}
+                className={`bg-wurm-panel p-4 rounded border border-wurm-border min-w-0 ${
+                  detailCards.length % 2 === 1 && index === detailCards.length - 1 ? 'sm:col-span-2' : ''
+                }`}
+              >
+                <div className="flex items-center gap-3 text-wurm-accentDim mb-2">
+                  {card.icon}
+                  <span className="font-bold text-[10px] font-mono uppercase tracking-widest">{card.label}</span>
+                </div>
+                <p className="text-wurm-text font-serif text-lg break-words">{card.value}</p>
+              </div>
+            ))}
           </div>
 
-          {/* Ingredients Section */}
+          {recipe.description && (
+            <p className="text-sm text-wurm-muted font-mono leading-relaxed">{recipe.description}</p>
+          )}
+
+          {ingredientSections.length > 0 ? (
           <div className="border-t border-wurm-border pt-6">
             <h3 className="flex items-center gap-3 text-lg font-bold font-serif text-wurm-text mb-4">
               <span className="text-wurm-accent"><Utensils size={20} /></span>
               {t.ui.ingredients}
             </h3>
-
-            {ingredients.length > 0 ? (
-              <div className="bg-black/20 rounded border border-wurm-border/50">
-                <ul className="divide-y divide-wurm-border/50">
-                  {ingredients.map((item, idx) => {
-                    // Find if this ingredient component is actually a recipe itself
-                    const matchedRecipeName = allRecipeNames && findRecipeMatch(item, allRecipeNames);
-
-                    return (
-                      <li key={idx} className="p-3 sm:p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
-                        <div className="w-1.5 h-1.5 rounded-full bg-wurm-accent flex-shrink-0" />
-                        {matchedRecipeName && onIngredientClick ? (
-                          <button
-                            onClick={() => onIngredientClick(matchedRecipeName)}
-                            className="text-wurm-accent font-mono text-sm hover:underline text-left"
-                            title={`View Recipe: ${matchedRecipeName}`}
-                          >
-                            {item}
-                          </button>
-                        ) : (
-                          <span className="text-wurm-text font-mono text-sm">{item}</span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+              <div className="space-y-4">
+                {ingredientSections.map(section => (
+                  <div key={section.key}>
+                    {ingredientSections.length > 1 && (
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-wurm-muted mb-2">
+                        {groupLabel(section.key, lang)}
+                      </p>
+                    )}
+                    <div className="bg-black/20 rounded border border-wurm-border/50">
+                      <ul className="divide-y divide-wurm-border/50">
+                        {section.items.map((item, idx) => {
+                          const matchedRecipeName = allRecipeNames && findRecipeMatch(item, allRecipeNames);
+                          return (
+                            <li key={`${section.key}-${idx}`} className="p-3 sm:p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
+                              <div className="w-1.5 h-1.5 rounded-full bg-wurm-accent flex-shrink-0" />
+                              {matchedRecipeName && onIngredientClick ? (
+                                <button
+                                  onClick={() => onIngredientClick(matchedRecipeName)}
+                                  className="text-wurm-accent font-mono text-sm hover:underline text-left"
+                                  title={`View Recipe: ${matchedRecipeName}`}
+                                >
+                                  {item}
+                                </button>
+                              ) : (
+                                <span className="text-wurm-text font-mono text-sm">{item}</span>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <p className="text-wurm-muted italic text-center py-4 text-sm font-mono border border-dashed border-wurm-border rounded">
-                {t.ui.noIngredients}
-              </p>
-            )}
-          </div>
+            </div>
+          ) : !(recipe.active || recipe.target) ? (
+            <p className="text-wurm-muted italic text-center py-4 text-sm font-mono border border-dashed border-wurm-border rounded">
+              {t.ui.noIngredients}
+            </p>
+          ) : null}
 
           {/* Hint Section */}
           {(recipe.hint_en || recipe.hint_pt || recipe.hint_ru) && (
@@ -337,7 +383,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
         </div>
 
         {/* Footer with Thumbs Up */}
-        {recipe.id && (recipe.status === 'verified' || recipe.status === 'legacy_verified' || recipe.status === 'pending') && (
+        {persistable && (recipe.status === 'verified' || recipe.status === 'legacy_verified' || recipe.status === 'pending') && (
           <div className="border-t border-wurm-border bg-black/40 px-6 py-4 flex items-center justify-between">
             <span className="text-[10px] text-wurm-muted font-mono uppercase tracking-wider">
               {votedToday 

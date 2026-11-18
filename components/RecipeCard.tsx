@@ -1,6 +1,7 @@
 import React from 'react';
 import { Recipe, Language } from '../types';
 import { getEmoji } from '../utils/dataUtils';
+import { formatRecipePart } from '../utils/catalog';
 import { translateSkill } from '../utils/translations';
 import { BookOpen, Box, Flame } from 'lucide-react';
 
@@ -11,9 +12,17 @@ interface RecipeCardProps {
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
-  const ingredients = recipe.mandatory
-    ? recipe.mandatory.split(';').map(i => i.trim()).join(' • ')
-    : 'No mandatory ingredients'; // This specific string might be worth translating if it comes from empty string logic in render, but strictly the request said "ingredients... keep in english". 
+  const action = recipe.active && recipe.target
+    ? `${formatRecipePart(recipe.active)} → ${formatRecipePart(recipe.target)}`
+    : recipe.active
+      ? formatRecipePart(recipe.active)
+      : recipe.target
+        ? formatRecipePart(recipe.target)
+        : '';
+  const ingredientLine = recipe.mandatory
+    ? recipe.mandatory.split(';').map(item => item.trim()).join(' • ')
+    : (recipe.ingredientGroups || []).flatMap(group => group.items).slice(0, 4).join(' • ');
+  const ingredients = [action, ingredientLine].filter(Boolean).join(' · ') || 'No mandatory ingredients'; 
 
   return (
     <div 

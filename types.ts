@@ -1,3 +1,18 @@
+export interface RecipePart {
+  id: string;
+  cstate?: string;
+  pstate?: string;
+  material?: string;
+  realtemplate?: string;
+  ratio?: number;
+  amount?: number;
+}
+
+export interface IngredientGroup {
+  key: string;
+  items: string[];
+}
+
 export interface Recipe {
   id?: string;
   name: string;
@@ -6,6 +21,11 @@ export interface Recipe {
   cooker: string;
   mandatory: string;
   difficulty?: number;
+  trigger?: string;
+  active?: RecipePart;
+  target?: RecipePart;
+  ingredientGroups?: IngredientGroup[];
+  description?: string;
   status?: string;
   submitted_by?: string;
   screenshot_url?: string;

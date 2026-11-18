@@ -14,7 +14,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import UsageWidget from './components/Admin/UsageWidget';
 import { usePaginatedRecipes } from './hooks/usePaginatedRecipes';
-import { getUniqueValues } from './utils/dataUtils';
+import { catalogNames, catalogOptions, findCatalogRecipe } from './utils/catalog';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
@@ -63,7 +63,8 @@ const AppContent: React.FC = () => {
 
   const debouncedSearchTerm = useDebounce(filters.search, 500);
 
-  const [allRecipeNames, setAllRecipeNames] = useState<Set<string>>(new Set());
+  const allRecipeNames = useMemo(() => catalogNames(), []);
+  const facetOptions = useMemo(() => catalogOptions(), []);
 
   const [lang, setLang] = useState<Language>(() => {
     const saved = localStorage.getItem('wurm_language');
@@ -90,22 +91,10 @@ const AppContent: React.FC = () => {
     itemsPerPage: 50,
     searchTerm: debouncedSearchTerm,
     pendingOnly: pendingOnly,
+    skill: filters.skill,
+    container: filters.container,
+    cooker: filters.cooker,
   });
-
-  // --- Fetch All Recipe Names for Linking ---
-  useEffect(() => {
-    const fetchAllNames = async () => {
-      const { data } = await supabase
-        .from('recipes')
-        .select('name')
-        .in('status', ['verified', 'legacy_verified']);
-
-      if (data) {
-        setAllRecipeNames(new Set(data.map((r: { name: string }) => r.name.toLowerCase())));
-      }
-    };
-    fetchAllNames();
-  }, []);
 
   // Fetch pending count and contributors on mount/refresh
   useEffect(() => {
@@ -134,42 +123,14 @@ const AppContent: React.FC = () => {
     fetchContributors();
   }, [recipes]);
 
-  const handleIngredientClick = async (recipeName: string) => {
-    try {
-      const { data } = await supabase
-        .from('recipes')
-        .select('*')
-        .ilike('name', recipeName)
-        .in('status', ['verified', 'legacy_verified'])
-        .single();
-
-      if (data) {
-        const mappedRecipe: Recipe = {
-          id: data.id,
-          name: data.name,
-          skill: data.skill || '',
-          container: data.container || '',
-          cooker: data.cooker || '',
-          mandatory: data.mandatory || '',
-          status: data.status,
-          hint_en: data.hint_en,
-          hint_pt: data.hint_pt,
-          hint_ru: data.hint_ru,
-          // Map other fields if necessary
-        };
-        setRecipeHistory(prev => [...prev, mappedRecipe]);
-      }
-    } catch (err) {
-      console.error("Error fetching linked recipe:", err);
-    }
+  const handleIngredientClick = (recipeName: string) => {
+    const found = findCatalogRecipe(recipeName);
+    if (found) setRecipeHistory(prev => [...prev, found]);
   };
 
-  // --- Derived State (Options for Dropdowns) ---
-  // Note: For dropdowns, we get unique values from ALL recipes, not just current page
-  // This requires a separate query or we accept that options might be incomplete
-  const skillOptions = useMemo(() => getUniqueValues(recipes, 'skill'), [recipes]);
-  const containerOptions = useMemo(() => getUniqueValues(recipes, 'container'), [recipes]);
-  const cookerOptions = useMemo(() => getUniqueValues(recipes, 'cooker'), [recipes]);
+  const skillOptions = facetOptions.skills;
+  const containerOptions = facetOptions.containers;
+  const cookerOptions = facetOptions.cookers;
 
   // --- Client-Side Filtering (skill, container, cooker) ---
   // Search is handled server-side in usePaginatedRecipes
@@ -211,8 +172,7 @@ const AppContent: React.FC = () => {
     const namesArray = Array.from(allRecipeNames);
     const randomName = namesArray[Math.floor(Math.random() * namesArray.length)];
 
-    // Reuse the existing ingredient click handler logic since it fetches by name
-    await handleIngredientClick(randomName);
+    handleIngredientClick(randomName);
   };
 
   const handleOcrFileSelect = (files: File[]) => {
@@ -343,7 +303,7 @@ const AppContent: React.FC = () => {
               Wurm <span className="text-wurm-accent">{t.ui.introTitle}</span>
             </h2>
             <p className="text-wurm-muted max-w-2xl text-sm font-mono leading-relaxed">
-              // {recipes.length} {t.ui.introSubtitle}
+              // {totalCount} {t.ui.introSubtitle}
             </p>
           </div>
         </div>
