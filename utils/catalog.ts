@@ -103,9 +103,11 @@ function mapRecipe(raw: RawRecipe): Recipe {
 const catalog: Recipe[] = (rawRecipes as RawRecipe[]).map(mapRecipe).sort((a, b) => a.name.localeCompare(b.name));
 
 const byName = new Map<string, Recipe>();
+const byId = new Map<string, Recipe>();
 for (const recipe of catalog) {
   const key = recipe.name.toLowerCase();
   if (!byName.has(key)) byName.set(key, recipe);
+  if (recipe.id) byId.set(recipe.id, recipe);
 }
 
 export function getCatalog(): Recipe[] {
@@ -114,6 +116,10 @@ export function getCatalog(): Recipe[] {
 
 export function findCatalogRecipe(name: string): Recipe | undefined {
   return byName.get(name.trim().toLowerCase());
+}
+
+export function findCatalogRecipeById(id: string): Recipe | undefined {
+  return byId.get(id);
 }
 
 export function catalogNames(): Set<string> {
@@ -161,15 +167,17 @@ function hasId(joined: string, id: string): boolean {
   return joined.split(', ').includes(id);
 }
 
-export function queryCatalog(query: CatalogQuery): { items: Recipe[]; total: number } {
+export function recipeMatches(recipe: Recipe, query: Omit<CatalogQuery, 'page' | 'itemsPerPage'>): boolean {
   const search = (query.searchTerm || '').trim().toLowerCase();
-  const matched = catalog.filter(recipe => {
-    if (query.skill && recipe.skill.toLowerCase() !== query.skill.toLowerCase()) return false;
-    if (!hasId(recipe.container, query.container || '')) return false;
-    if (!hasId(recipe.cooker, query.cooker || '')) return false;
-    if (search && !haystack(recipe).includes(search)) return false;
-    return true;
-  });
+  if (query.skill && recipe.skill.toLowerCase() !== query.skill.toLowerCase()) return false;
+  if (!hasId(recipe.container, query.container || '')) return false;
+  if (!hasId(recipe.cooker, query.cooker || '')) return false;
+  if (search && !haystack(recipe).includes(search)) return false;
+  return true;
+}
+
+export function queryCatalog(query: CatalogQuery): { items: Recipe[]; total: number } {
+  const matched = catalog.filter(recipe => recipeMatches(recipe, query));
   const start = query.page * query.itemsPerPage;
   return {
     items: matched.slice(start, start + query.itemsPerPage),

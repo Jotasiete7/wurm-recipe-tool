@@ -1,0 +1,76 @@
+# Receitas para conferir
+
+- baked berry cheesecake
+- baked cheesecake
+- baked chocolate cheesecake
+- baked fruit cheesecake
+- baked lemon cheesecake
+- berry cheesecake
+- berry pie
+- berry trifle
+- boiled egg
+- boiled egg sandwich
+- campaign bread
+- candied berry
+- candied fruit
+- cheese and tomato swirls
+- cheese toast
+- chocolate
+- chocolate toffee trifle
+- cottage pie
+- custard pie
+- digestive biscuit
+- egg salad crostini
+- fish cake
+- fish pasty
+- fried dandelions
+- fried egg
+- fried veg
+- fries
+- fruit cake
+- fruit cheesecake
+- fruity cookie
+- game pie
+- ginger cookie
+- grilled fish and chips
+- haggis with whisky sauce
+- hawaiian pasty
+- hot dog
+- kalakukko
+- lasagne
+- lemon marmalade
+- meat curry
+- meat pasty
+- mint humbugs
+- mushy peas
+- nougat
+- nutty cookie
+- omelette
+- onion rings
+- open sandwich
+- oven roasted chestnut
+- pasta carbonara
+- pasta napolitana
+- pastry
+- pork pie
+- quiche
+- raspberry pi
+- ratatouille
+- rice pudding
+- roasted meat
+- sandwich
+- scotched egg
+- simple pasta
+- spaghetti
+- spaghetti bolognese
+- spiced apple
+- spiced cookie
+- steak
+- steak and ale pie
+- steak and chips
+- strawberry trifle
+- tagliatelle
+- tempura vegetables
+- veg gulasch
+- veg maki
+- veg pasty

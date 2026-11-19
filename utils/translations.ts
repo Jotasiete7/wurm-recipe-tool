@@ -42,6 +42,11 @@ interface TranslationData {
     uniqueRecipe: string;
     uniqueRecipeBy: string;
     back: string;
+    favorites: string;
+    saveFavorite: string;
+    savedFavorite: string;
+    noFavorites: string;
+    favoritesHint: string;
     statsLinkLabel: string;
     statsLinkSub: string;
     statsExplore: string;
@@ -154,9 +159,14 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       alreadyVoted: "You already voted today for this recipe.",
       cannotConfirmOwnRecipe: "You cannot vote to confirm your own recipe.",
       noPendingRecipes: "No pending recipes at the moment.",
-      uniqueRecipe: "⭐ Unique Recipe",
+      uniqueRecipe: "Unique Recipe",
       uniqueRecipeBy: "Recipe created by {creator} on {server}",
       back: "Back",
+      favorites: "Favorites",
+      saveFavorite: "Save",
+      savedFavorite: "Saved",
+      noFavorites: "No saved recipes yet",
+      favoritesHint: "Tap the heart on a recipe to keep it here.",
       statsLinkLabel: "Statistics & Rankings",
       statsLinkSub: "Recipes · Ingredients · Market",
       statsExplore: "Explore",
@@ -275,9 +285,14 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       alreadyVoted: "Você já votou hoje nesta receita.",
       cannotConfirmOwnRecipe: "Você não pode votar para confirmar sua própria receita.",
       noPendingRecipes: "Nenhuma receita pendente no momento.",
-      uniqueRecipe: "⭐ Receita Única",
+      uniqueRecipe: "Receita Única",
       uniqueRecipeBy: "Receita criada por {creator} em {server}",
       back: "Voltar",
+      favorites: "Favoritos",
+      saveFavorite: "Salvar",
+      savedFavorite: "Salvo",
+      noFavorites: "Nenhuma receita salva ainda",
+      favoritesHint: "Toque no coração de uma receita para guardá-la aqui.",
       statsLinkLabel: "Estatísticas & Rankings",
       statsLinkSub: "Receitas · Ingredientes · Mercado",
       statsExplore: "Explorar",
@@ -396,9 +411,14 @@ export const TRANSLATIONS: Record<Language, TranslationData> = {
       alreadyVoted: "Вы уже голосовали за этот рецепт сегодня.",
       cannotConfirmOwnRecipe: "Вы не можете голосовать за подтверждение собственного рецепта.",
       noPendingRecipes: "В данный момент нет рецептов на верификации.",
-      uniqueRecipe: "⭐ Уникальный рецепт",
+      uniqueRecipe: "Уникальный рецепт",
       uniqueRecipeBy: "Рецепт создан {creator} на сервере {server}",
       back: "Назад",
+      favorites: "Избранное",
+      saveFavorite: "Сохранить",
+      savedFavorite: "Сохранено",
+      noFavorites: "Пока нет сохранённых рецептов",
+      favoritesHint: "Нажмите на сердце у рецепта, чтобы сохранить его здесь.",
       statsLinkLabel: "Статистика & Рейтинги",
       statsLinkSub: "Рецепты · Ингредиенты · Рынок",
       statsExplore: "Перейти",

@@ -2,8 +2,9 @@ import React from 'react';
 import { Recipe, Language } from '../types';
 import { getEmoji } from '../utils/dataUtils';
 import { formatRecipePart } from '../utils/catalog';
-import { translateSkill } from '../utils/translations';
-import { BookOpen, Box, Flame } from 'lucide-react';
+import { TRANSLATIONS, translateSkill } from '../utils/translations';
+import { BookOpen, Box, Flame, Heart } from 'lucide-react';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -12,6 +13,8 @@ interface RecipeCardProps {
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
+  const { has, toggle } = useFavorites();
+  const saved = Boolean(recipe.id && has(recipe.id));
   const action = recipe.active && recipe.target
     ? `${formatRecipePart(recipe.active)} → ${formatRecipePart(recipe.target)}`
     : recipe.active
@@ -31,6 +34,24 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
     >
       {/* Status Badges */}
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1 z-10">
+        {recipe.id && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              toggle(recipe.id!);
+            }}
+            className={`flex items-center justify-center w-7 h-7 rounded bg-black/80 border shadow-md shadow-black transition-colors ${
+              saved
+                ? 'border-wurm-accent/50 text-wurm-accent'
+                : 'border-wurm-border text-wurm-muted hover:text-wurm-accent hover:border-wurm-accent/40'
+            }`}
+            title={saved ? TRANSLATIONS[lang].ui.savedFavorite : TRANSLATIONS[lang].ui.saveFavorite}
+            aria-pressed={saved}
+          >
+            <Heart size={14} fill={saved ? 'currentColor' : 'none'} />
+          </button>
+        )}
         {recipe.status === 'pending' && (
           <span 
             className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-amber-500/30 text-[10px] text-amber-500 shadow-md shadow-black font-mono font-bold"
@@ -57,7 +78,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
                 ✓
               </span>
             )}
-            {(recipe.verification_level === 3 || recipe.is_unique) && (
+            {recipe.verification_level === 3 && (
               <span 
                 className="flex items-center justify-center w-5 h-5 rounded bg-black/80 border border-yellow-500/30 text-[10px] text-yellow-500 shadow-md shadow-black font-mono font-bold animate-[pulse_2s_infinite]"
                 title="Highly Verified / Trusted (Level 3)"
@@ -78,7 +99,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick, lang }) => {
           </div>
           
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold font-serif text-wurm-text group-hover:text-wurm-accent transition-colors truncate">
+            <h3 className="text-lg font-bold font-serif text-wurm-text group-hover:text-wurm-accent transition-colors truncate pr-9">
               {recipe.name}
             </h3>
             

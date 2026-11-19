@@ -14,7 +14,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import UsageWidget from './components/Admin/UsageWidget';
 import { usePaginatedRecipes } from './hooks/usePaginatedRecipes';
-import { catalogNames, catalogOptions, findCatalogRecipe } from './utils/catalog';
+import { catalogNames, catalogOptions, findCatalogRecipe, recipeMatches } from './utils/catalog';
+import { FavoritesProvider, useFavorites } from './contexts/FavoritesContext';
 import { TRANSLATIONS, translateSkill } from './utils/translations';
 import { Recipe, FilterState, Language } from './types';
 import DailyChallengeCard from './components/DailyChallengeCard';
@@ -24,7 +25,7 @@ import PendingInfoCard from './components/PendingInfoCard';
 import StatsPage from './components/StatsPage';
 import { useSearchLogger } from './hooks/useSearchLogger';
 import { useDebounce } from './hooks/useDebounce';
-import { Search, RotateCcw, User, LogOut } from 'lucide-react';
+import { Search, RotateCcw, User, LogOut, Heart } from 'lucide-react';
 
 import ResetPasswordModal from './components/ResetPasswordModal';
 
@@ -46,6 +47,8 @@ const AppContent: React.FC = () => {
 
   const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const { ids: favoriteIds, recipes: favoriteRecipes } = useFavorites();
   const [pendingCount, setPendingCount] = useState(0);
 
   interface Contributor {
@@ -144,15 +147,27 @@ const AppContent: React.FC = () => {
     });
   }, [recipes, filters.skill, filters.container, filters.cooker]);
 
+  const favoriteList = useMemo(() => {
+    return favoriteRecipes.filter(recipe => recipeMatches(recipe, {
+      searchTerm: debouncedSearchTerm,
+      skill: filters.skill,
+      container: filters.container,
+      cooker: filters.cooker,
+    }));
+  }, [favoriteRecipes, debouncedSearchTerm, filters.skill, filters.container, filters.cooker]);
+
+  const shownRecipes = favoritesOnly ? favoriteList : filteredRecipes;
+  const shownCount = favoritesOnly ? favoriteList.length : totalCount;
+
   // --- Search Analytics Logging ---
   // Passive hook — logs searches to Supabase with 800ms debounce.
   // Never blocks or throws. Captures both found and zero-result searches.
   useSearchLogger(
     debouncedSearchTerm,
-    filteredRecipes.length,
+    favoritesOnly ? favoriteList.length : filteredRecipes.length,
     lang,
-    filteredRecipes[0]?.id,
-    filteredRecipes[0]?.name
+    (favoritesOnly ? favoriteList : filteredRecipes)[0]?.id,
+    (favoritesOnly ? favoriteList : filteredRecipes)[0]?.name
   );
 
   // --- Handlers ---
@@ -316,7 +331,10 @@ const AppContent: React.FC = () => {
               <span>{pendingCount} {t.ui.pendingRecipesBanner}</span>
             </div>
             <button
-              onClick={() => setPendingOnly(prev => !prev)}
+              onClick={() => {
+                setPendingOnly(prev => !prev);
+                setFavoritesOnly(false);
+              }}
               className={`px-4 py-1.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border transition-all ${
                 pendingOnly
                   ? 'bg-amber-500 text-black border-amber-500 hover:bg-amber-600'
@@ -345,6 +363,26 @@ const AppContent: React.FC = () => {
                   <RotateCcw size={10} /> {t.ui.reset}
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setFavoritesOnly(prev => !prev);
+                  setPendingOnly(false);
+                }}
+                className={`w-full mb-5 px-3 py-2.5 rounded border text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-between transition-colors ${
+                  favoritesOnly
+                    ? 'bg-wurm-accent/15 border-wurm-accent/50 text-wurm-accent'
+                    : 'bg-black/40 border-wurm-border text-wurm-muted hover:text-wurm-accent hover:border-wurm-accent/40'
+                }`}
+                aria-pressed={favoritesOnly}
+              >
+                <span className="flex items-center gap-2">
+                  <Heart size={14} fill={favoritesOnly || favoriteIds.length > 0 ? 'currentColor' : 'none'} />
+                  {t.ui.favorites}
+                </span>
+                <span>{favoriteIds.length}</span>
+              </button>
 
               <div className="space-y-5">
                 {/* Search */}
@@ -415,7 +453,7 @@ const AppContent: React.FC = () => {
           <div className="lg:col-span-3">
             <div className="mb-6 flex items-center justify-between">
               <span className="text-xs text-wurm-muted font-mono uppercase tracking-widest">
-                {loading ? 'Loading...' : `${t.ui.foundRecipes} ${totalCount}`}
+                {loading && !favoritesOnly ? 'Loading...' : `${t.ui.foundRecipes} ${shownCount}`}
               </span>
             </div>
 
@@ -427,7 +465,7 @@ const AppContent: React.FC = () => {
             )}
 
             {/* Loading State */}
-            {loading ? (
+            {loading && !favoritesOnly ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {!pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
                   <>
@@ -457,10 +495,10 @@ const AppContent: React.FC = () => {
                 )}
                 <RecipeSkeleton count={6} />
               </div>
-            ) : filteredRecipes.length > 0 ? (
+            ) : shownRecipes.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {!pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
+                  {!favoritesOnly && !pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
                     <>
                       <DailyChallengeCard
                         onChallenge={handleDailyChallenge}
@@ -477,7 +515,7 @@ const AppContent: React.FC = () => {
                       />
                     </>
                   )}
-                  {pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
+                  {!favoritesOnly && pendingOnly && !filters.search && !filters.skill && !filters.container && !filters.cooker && (
                     <>
                       <PendingInfoCard lang={lang} />
                       <SubmitRecipeOcrCard
@@ -486,7 +524,7 @@ const AppContent: React.FC = () => {
                       />
                     </>
                   )}
-                  {filteredRecipes.map((recipe, idx) => (
+                  {shownRecipes.map((recipe, idx) => (
                     <RecipeCard
                       key={`${recipe.name}-${idx}`}
                       recipe={recipe}
@@ -497,27 +535,38 @@ const AppContent: React.FC = () => {
                 </div>
 
                 {/* Pagination */}
-                <Pagination
-                  currentPage={page}
-                  totalPages={totalPages}
-                  totalCount={totalCount}
-                  itemsPerPage={50}
-                  onPageChange={goToPage}
-                  hasNextPage={hasNextPage}
-                  hasPrevPage={hasPrevPage}
-                  loading={loading}
-                />
+                {!favoritesOnly && (
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    itemsPerPage={50}
+                    onPageChange={goToPage}
+                    hasNextPage={hasNextPage}
+                    hasPrevPage={hasPrevPage}
+                    loading={loading}
+                  />
+                )}
               </>
             ) : (
               <div className="text-center py-24 bg-wurm-panel rounded border border-dashed border-wurm-border">
-                <div className="text-4xl mb-4 grayscale opacity-50">🥘</div>
-                <h3 className="text-lg font-serif font-bold text-wurm-text">{t.ui.noRecipes}</h3>
-                <p className="text-wurm-muted mt-2 text-sm font-mono">{t.ui.tryAdjust}</p>
+                <div className="text-4xl mb-4 grayscale opacity-50">{favoritesOnly && favoriteIds.length === 0 ? '♡' : '🥘'}</div>
+                <h3 className="text-lg font-serif font-bold text-wurm-text">
+                  {favoritesOnly && favoriteIds.length === 0 ? t.ui.noFavorites : t.ui.noRecipes}
+                </h3>
+                <p className="text-wurm-muted mt-2 text-sm font-mono">
+                  {favoritesOnly && favoriteIds.length === 0 ? t.ui.favoritesHint : t.ui.tryAdjust}
+                </p>
                 <button
-                  onClick={resetFilters}
+                  onClick={() => {
+                    if (favoritesOnly && favoriteIds.length === 0) setFavoritesOnly(false);
+                    else resetFilters();
+                  }}
                   className="mt-6 px-6 py-2 bg-wurm-accent/10 border border-wurm-accent text-wurm-accent text-xs font-bold uppercase tracking-widest hover:bg-wurm-accent hover:text-black transition-all"
                 >
-                  {t.ui.clearFilters}
+                  {favoritesOnly && favoriteIds.length === 0
+                    ? (lang === 'pt' ? 'Ver todas' : lang === 'ru' ? 'Все рецепты' : 'Show all')
+                    : t.ui.clearFilters}
                 </button>
               </div>
             )}
@@ -601,7 +650,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <AuthProvider>
     <NotificationProvider>
-      <AppContent />
+      <FavoritesProvider>
+        <AppContent />
+      </FavoritesProvider>
     </NotificationProvider>
   </AuthProvider>
 );

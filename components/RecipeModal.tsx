@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Recipe, Language } from '../types';
 import { getEmoji, findRecipeMatch } from '../utils/dataUtils';
 import { translateSkill } from '../utils/translations';
-import { X, ChefHat, Box, Flame, Utensils, Edit3, ArrowLeft, Crosshair, Target } from 'lucide-react';
+import { X, ChefHat, Box, Flame, Utensils, Edit3, ArrowLeft, Crosshair, Target, Heart } from 'lucide-react';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { formatRecipePart } from '../utils/catalog';
 import { useAuth } from '../contexts/AuthContext';
 import RecipeEditModal from './RecipeEditModal';
@@ -41,6 +42,8 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
   onIngredientClick
 }) => {
   const { isAdmin } = useAuth();
+  const { has, toggle } = useFavorites();
+  const saved = Boolean(recipe?.id && has(recipe.id));
   const { showNotification } = useNotification();
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -226,6 +229,21 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                     {translateSkill(recipe.skill, lang)}
                   </span>
                 )}
+                {recipe.id && (
+                  <button
+                    type="button"
+                    onClick={() => toggle(recipe.id!)}
+                    className={`px-3 py-1 rounded text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 border transition-colors ${
+                      saved
+                        ? 'bg-wurm-accent/15 border-wurm-accent/40 text-wurm-accent'
+                        : 'bg-black/30 border-wurm-border text-wurm-muted hover:text-wurm-accent hover:border-wurm-accent/40'
+                    }`}
+                    aria-pressed={saved}
+                  >
+                    <Heart size={12} fill={saved ? 'currentColor' : 'none'} />
+                    <span>{saved ? t.ui.savedFavorite : t.ui.saveFavorite}</span>
+                  </button>
+                )}
                 {recipe.status === 'pending' && (
                   <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs font-mono font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
                     <span>⏳</span>
@@ -246,7 +264,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                         <span>{lang === 'pt' ? 'Confirmada (Nível 2)' : (lang === 'ru' ? 'Подтверждено (Ур. 2)' : 'Confirmed (Level 2)')}</span>
                       </span>
                     )}
-                    {(recipe.verification_level === 3 || recipe.is_unique) && (
+                    {recipe.verification_level === 3 && (
                       <span className="px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs font-mono font-bold text-yellow-500 uppercase tracking-wider flex items-center gap-1.5 animate-[pulse_3s_infinite]">
                         <span>⭐</span>
                         <span>{lang === 'pt' ? 'Alta Confiança (Nível 3)' : (lang === 'ru' ? 'Высокое доверие (Ур. 3)' : 'Trusted (Level 3)')}</span>
@@ -264,8 +282,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 
           {/* Unique Recipe Credits */}
           {recipe.is_unique && (
-            <div className="bg-yellow-950/20 border border-yellow-500/30 rounded p-4 flex items-center gap-3 animate-in fade-in duration-200">
-              <span className="text-xl">⭐</span>
+            <div className="bg-yellow-950/20 border border-yellow-500/30 rounded p-4 animate-in fade-in duration-200">
               <div>
                 <h4 className="text-xs font-bold text-yellow-500 uppercase tracking-wider mb-0.5">
                   {t.ui.uniqueRecipe}
